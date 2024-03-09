@@ -9,21 +9,21 @@ linters-settings:
         - mi int
         - ok bool
       #  - re *regexp.Regexp
-      #  - iT *iTst
 
 linters:
   enable-all: true
   disable:
     - dupl
     - dupword
-    - err113
-    - exhaustruct
+    - goerr113
     - goconst
     - gofumpt
     - gosec
     - gosmopolitan
     - lll
+    - nestif
     - nlreturn
+    - nonamedreturns
     - stylecheck
     - varnamelen
     - wrapcheck
@@ -58,13 +58,13 @@ issues:
       linters:
         - depguard
         - dupl
-        - exhaustruct
         - funlen
         - goconst
         - cyclo
-        #- goerr113
+        - goerr113
         - gofumpt
         - gosec
+        - gosmopolitan
         - lll
         - maintidx
         - nlreturn

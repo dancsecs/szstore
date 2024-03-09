@@ -38,11 +38,12 @@ type winDB struct {
 
 // newWinDB creates a new DB objects to contain all windowed entries.
 func newWinDB(datKey string) *winDB {
-	return &winDB{
-		datKey:    datKey,
-		maxPeriod: time.Nanosecond,
-		windows:   make(map[string]*window),
-	}
+	newWinDB := new(winDB)
+	newWinDB.datKey = datKey
+	newWinDB.maxPeriod = time.Nanosecond
+	newWinDB.windows = make(map[string]*window)
+
+	return newWinDB
 }
 
 // addWindow includes a new time period to account all entries for.

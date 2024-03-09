@@ -38,7 +38,7 @@ func (e *windowEntry) newHead(
 	n *windowEntry, t time.Time, f float64,
 ) *windowEntry {
 	if n == nil {
-		n = &windowEntry{}
+		n = new(windowEntry)
 	}
 
 	n.t = t
@@ -77,12 +77,12 @@ func newWindow(datKey, winKey string, p time.Duration) *window {
 	if p < time.Nanosecond {
 		p = time.Nanosecond
 	}
-	newWin := window{
-		datKey: datKey,
-		winKey: winKey,
-		period: p,
-	}
-	return &newWin
+	newWin := new(window)
+	newWin.datKey = datKey
+	newWin.winKey = winKey
+	newWin.period = p
+
+	return newWin
 }
 
 func (w *window) addThreshold(

@@ -72,7 +72,7 @@ type fileStore struct {
 
 // newFileStore opens or creates a fileStore object.
 func newFileStore(dir, fileNameRoot string) *fileStore {
-	fs := &fileStore{}
+	fs := new(fileStore)
 	fs.opened = false
 	fs.dir = dir
 	fs.fileNameRoot = fileNameRoot
@@ -264,7 +264,7 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 func (fs *fileStore) load(timeStamp time.Time, key, value string) {
 	t, ok := fs.data[key]
 	if !ok {
-		t = &dataPointx{}
+		t = new(dataPointx)
 		fs.data[key] = t
 		if _, ok := fs.winDB[key]; !ok {
 			fs.winDB[key] = newWinDB(key)

@@ -37,9 +37,9 @@ type WStoreString struct {
 // NewString a new Store object.
 func NewString(dir, fName string) *WStoreString {
 	s := newFileStore(dir, fName)
-	return &WStoreString{
-		fileStore: s,
-	}
+	newWStoreString := new(WStoreString)
+	newWStoreString.fileStore = s
+	return newWStoreString
 }
 
 // SetInvalidChars set the character set of invalid characters.

@@ -341,8 +341,10 @@ func TestWindowWindow_TestThresholds(t *testing.T) {
 	)
 
 	w.add(&windowEntry{
-		t: chk.ClockNext(),
-		f: 100.0,
+		t:    chk.ClockNext(),
+		f:    100.0,
+		next: nil,
+		prev: nil,
 	})
 
 	chk.True(callbackTriggered)
