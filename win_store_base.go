@@ -42,8 +42,8 @@ const (
 )
 
 // dataPoint defines an individual storage entry.
-type dataPointx struct {
-	Ts    time.Time
+type dataPoint struct {
+	TS    time.Time
 	Value string
 }
 
@@ -59,7 +59,7 @@ type fileStore struct {
 	fileHistory     []string
 
 	// Most recent Values.
-	data map[string]*dataPointx
+	data map[string]*dataPoint
 
 	// Windows.
 	winDB map[string]*winDB
@@ -78,7 +78,7 @@ func newFileStore(dir, fileNameRoot string) *fileStore {
 	fs.opened = false
 	fs.dir = dir
 	fs.fileNameRoot = fileNameRoot
-	fs.data = make(map[string]*dataPointx)
+	fs.data = make(map[string]*dataPoint)
 	fs.winDB = make(map[string]*winDB)
 	fs.ts = time.Now // Default
 
@@ -273,22 +273,22 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 func (fs *fileStore) load(timeStamp time.Time, key, value string) {
 	t, ok := fs.data[key]
 	if !ok {
-		t = new(dataPointx)
+		t = new(dataPoint)
 		fs.data[key] = t
 		if _, ok := fs.winDB[key]; !ok {
 			fs.winDB[key] = newWinDB(key)
 		}
-	} else if t.Ts.After(timeStamp) {
+	} else if t.TS.After(timeStamp) {
 		fs.logMsg(
 			fmt.Sprintf("load: invalid timestamp out of sequence:"+
 				" received date: %s last date: %s",
 				timeStamp.Format(fmtTimeStamp),
-				t.Ts.Format(fmtTimeStamp),
+				t.TS.Format(fmtTimeStamp),
 			),
 		)
 		return
 	}
-	t.Ts = timeStamp
+	t.TS = timeStamp
 	t.Value = value
 }
 
@@ -325,7 +325,7 @@ func (fs *fileStore) get(datKey string) (time.Time, string, bool) {
 
 	entry, ok := fs.data[datKey]
 	if ok {
-		return entry.Ts, entry.Value, true
+		return entry.TS, entry.Value, true
 	}
 	log.Printf("get(%q): %v", datKey, ErrUnknownDatKey)
 	return time.Time{}, "", false
