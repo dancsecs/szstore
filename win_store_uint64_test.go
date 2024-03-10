@@ -69,10 +69,9 @@ func validateUint64History(
 
 	tsSlice, vSlice := uint64Store.GetHistoryDays(datKey, days)
 
-	var tSlice []string
-
-	for _, ts := range tsSlice {
-		tSlice = append(tSlice, ts.Format(fmtTimeStamp))
+	tSlice := make([]string, len(tsSlice))
+	for i, ts := range tsSlice {
+		tSlice[i] = ts.Format(fmtTimeStamp)
 	}
 
 	chk.StrSlice(tSlice, expTSlice)

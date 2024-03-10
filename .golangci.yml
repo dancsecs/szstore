@@ -51,7 +51,6 @@ issues:
         - lll
         - maintidx
         - paralleltest
-        - prealloc
         - testpackage
         - wastedassign
 
