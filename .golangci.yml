@@ -3,6 +3,14 @@ linters-settings:
     line-length: 79
     tab-width: 4
 
+  depguard:
+    rules:
+      "Main":
+        files: _test.go # Only apply to go test files.
+        allow:
+          - $gostd
+          - github.com/dancsecs/sztest
+
   varnamelen:
       ignore-decls:
         - i int
@@ -38,8 +46,6 @@ issues:
         - dupl
     - path: _test\.go  # Exclude on test files.
       linters:
-        - cyclo
-        - depguard
         - funlen
         - goconst
         - lll
