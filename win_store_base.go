@@ -31,7 +31,7 @@ import (
 
 const (
 	groupSeparator         = "|"
-	defaultFilePermissions = 0644
+	defaultFilePermissions = 0o0644
 	expectedNumberOfFields = 4
 	minKeyLength           = 2
 	fmtTimeStamp           = "20060102150405.000000000"

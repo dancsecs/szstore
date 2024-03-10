@@ -118,7 +118,7 @@ func TestWStoreBase_EmptyDirectory(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -141,7 +141,7 @@ func TestWStoreBase_OpenInvalidRecordParsing(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -253,7 +253,7 @@ func TestFile_LoadHistoryInvalidFileClose(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -284,7 +284,7 @@ func TestWStoreBase_LoadHistoryInvalidFile(t *testing.T) {
 
 	d, _, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -304,7 +304,7 @@ func TestWStoreBase_AddAllInvalidFile(t *testing.T) {
 
 	d, _, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -324,7 +324,7 @@ func TestWStoreBase_GetUnknownInvalidKey(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -367,7 +367,7 @@ func TestWStoreBase_UpdateDeleteOnClosedFile(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -399,7 +399,7 @@ func TestWStoreBase_OpenValidRecordExtraGroupSeperator(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -430,7 +430,7 @@ func TestWStoreBase_OpenHistoryWithAppendToLastFile(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -480,7 +480,7 @@ func TestWStoreBase_OpenHistoryWithNewFileRequired(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
@@ -530,7 +530,7 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 
 	d, f, s := setupWStoreBaseWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 

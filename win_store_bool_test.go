@@ -32,7 +32,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	dir, file, s := setupWStoreBoolWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
@@ -201,7 +201,7 @@ func Test_WStoreBool_UseCase(t *testing.T) {
 	defer chk.Release()
 	dir, file, s := setupWStoreBoolWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
@@ -296,7 +296,7 @@ func TestSzStoreBool_UseCase3(t *testing.T) {
 
 	dir, file, boolStore := setupWStoreBoolWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*3,
 	)
 

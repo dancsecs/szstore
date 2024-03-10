@@ -81,7 +81,7 @@ func Test_WStoreString_InvalidStringContent(t *testing.T) {
 
 	dir, file, s := setupWStoreStringWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
@@ -116,7 +116,7 @@ func Test_WStoreString_InvalidStringValue(t *testing.T) {
 
 	dir, file, s := setupWStoreStringWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
@@ -151,7 +151,7 @@ func Test_WStoreString_UseCase(t *testing.T) {
 
 	dir, file, s := setupWStoreStringWithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 

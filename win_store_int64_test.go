@@ -82,7 +82,7 @@ func Test_WStoreInt64_UseCase(t *testing.T) {
 	defer chk.Release()
 	dir, file, s := setupWStoreInt64WithClock(
 		chk,
-		time.Date(2000, 05, 15, 12, 24, 56, 0, time.Local),
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
