@@ -78,6 +78,7 @@ func validateUint8History(
 	chk.Uint8Slice(vSlice, expVSlice, 0)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreUint8_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

@@ -79,6 +79,7 @@ func validateBoolHistory(
 	chk.BoolSlice(vSlice, expVSlice, 0)
 }
 
+//nolint:funlen // Ok.
 func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
@@ -197,6 +198,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreBool_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
@@ -292,6 +294,7 @@ func Test_WStoreBool_UseCase(t *testing.T) {
 	)
 }
 
+//nolint:funlen // Ok.
 func TestSzStoreBool_UseCase3(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

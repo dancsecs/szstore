@@ -78,6 +78,7 @@ func validateInt8History(
 	chk.Int8Slice(vSlice, expVSlice, 0)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreInt8_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

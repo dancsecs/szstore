@@ -78,6 +78,7 @@ func validateInt64History(
 	chk.Int64Slice(vSlice, expVSlice, 0)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreInt64_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

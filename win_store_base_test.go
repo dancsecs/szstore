@@ -140,6 +140,8 @@ func TestWStoreBase_EmptyDirectory(t *testing.T) {
 }
 
 // Test all file parsing error logging.
+//
+//nolint:funlen // Ok.
 func TestWStoreBase_OpenInvalidRecordParsing(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
@@ -530,6 +532,7 @@ func TestWStoreBase_OpenHistoryWithNewFileRequired(t *testing.T) {
 	)
 }
 
+//nolint:funlen // Ok.
 func TestWStoreBase_UseCase1(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

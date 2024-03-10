@@ -78,6 +78,7 @@ func validateFloat64History(
 	chk.Float64Slice(vSlice, expVSlice, 0)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreFloat64_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

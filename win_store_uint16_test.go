@@ -78,6 +78,7 @@ func validateUint16History(
 	chk.Uint16Slice(vSlice, expVSlice, 0)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreUint16_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

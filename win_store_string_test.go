@@ -147,6 +147,7 @@ func Test_WStoreString_InvalidStringValue(t *testing.T) {
 	)
 }
 
+//nolint:funlen // Ok.
 func Test_WStoreString_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()

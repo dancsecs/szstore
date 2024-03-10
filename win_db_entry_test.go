@@ -45,6 +45,7 @@ func TestWindowEntry_String(t *testing.T) {
 	chk.Str(entry.String(), "{{clkNano0}} - 123.456")
 }
 
+//nolint:funlen // Ok.
 func TestWindowEntry_Logging(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
