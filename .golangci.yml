@@ -19,7 +19,6 @@ linters:
     - nlreturn
     - stylecheck
     - varnamelen
-    - wrapcheck
     - wsl
 
     - deadcode # Deprecated
@@ -55,7 +54,6 @@ issues:
         - testpackage
         - varnamelen
         - wastedassign
-        - wrapcheck
         - wsl
         - unparam
 

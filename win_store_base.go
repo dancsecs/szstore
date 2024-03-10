@@ -110,7 +110,7 @@ func (fs *fileStore) Open() error {
 
 	allFiles, err := os.ReadDir(fs.dir)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck // Ok.
 	}
 
 	for _, fileInf := range allFiles {
@@ -142,7 +142,7 @@ func (fs *fileStore) Open() error {
 	if err == nil {
 		fs.opened = true
 	}
-	return err
+	return err //nolint:wrapcheck // Ok.
 }
 
 func (fs *fileStore) generateFilePath(t time.Time) string {
@@ -166,7 +166,7 @@ func (fs *fileStore) openFile(fPath string) error {
 		fs.currentFileDate = fPath[len(fPath)-12 : len(fPath)-4]
 		fs.currentFile = f
 	}
-	return err
+	return err //nolint:wrapcheck // Ok.
 }
 
 func (fs *fileStore) loadHistoryFile(
@@ -188,7 +188,7 @@ func (fs *fileStore) loadHistoryFile(
 			}
 		}
 	}
-	return scanner.Err()
+	return scanner.Err() //nolint:wrapcheck // Ok.
 }
 
 func (fs *fileStore) loadHistory(fName string) {
@@ -315,7 +315,7 @@ func (fs *fileStore) writeToFile(
 		)
 		_, err = fs.currentFile.WriteString(entry)
 	}
-	return ts, err
+	return ts, err //nolint:wrapcheck // Ok.
 }
 
 // get returns the last value set for the specific key.
