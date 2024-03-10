@@ -63,12 +63,10 @@ func (s *WStoreInt) Update(key string, value int) error {
 }
 
 // Get returns the most recent value for the associated key.
-func (s *WStoreInt) Get(
-	key string,
-) (lastTime time.Time, value int, ok bool) {
+func (s *WStoreInt) Get(key string) (time.Time, int, bool) {
 	ts, v, ok := s.fileStore.get(key)
 	if ok {
-		value, ok = s.parseInt(v)
+		value, ok := s.parseInt(v)
 		if ok {
 			return ts, value, true
 		}

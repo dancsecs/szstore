@@ -20,7 +20,6 @@ linters:
     - lll
     - nestif
     - nlreturn
-    - nonamedreturns
     - stylecheck
     - varnamelen
     - wrapcheck
@@ -51,7 +50,6 @@ issues:
         - cyclo
         - gofumpt
         - gosec
-        - gosmopolitan
         - lll
         - maintidx
         - nlreturn

@@ -63,12 +63,10 @@ func (s *WStoreUint32) Update(key string, value uint32) error {
 }
 
 // Get returns the most recent value for the associated key.
-func (s *WStoreUint32) Get(
-	key string,
-) (lastTime time.Time, value uint32, ok bool) {
+func (s *WStoreUint32) Get(key string) (time.Time, uint32, bool) {
 	ts, v, ok := s.fileStore.get(key)
 	if ok {
-		value, ok = s.parseUint32(v)
+		value, ok := s.parseUint32(v)
 		if ok {
 			return ts, value, true
 		}

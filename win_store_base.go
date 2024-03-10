@@ -201,13 +201,20 @@ func (fs *fileStore) loadHistory(fName string) {
 }
 
 func (fs *fileStore) splitRecord(filePath string, data string) (
-	ts time.Time,
-	action Action,
-	key string,
-	value string,
-	ok bool,
+	time.Time,
+	Action,
+	string,
+	string,
+	bool,
 ) {
 	const proc = "splitRecord: "
+
+	var (
+		ts     time.Time
+		action Action
+		key    string
+		value  string
+	)
 
 	f := strings.SplitN(data, groupSeparator, expectedNumberOfFields)
 	if len(f) != expectedNumberOfFields {
