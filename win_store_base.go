@@ -159,7 +159,7 @@ func (fs *fileStore) openFile(fPath string) error {
 		fs.currentFile = nil
 	}
 
-	f, err := os.OpenFile(
+	f, err := os.OpenFile( //nolint:gosec // Ok.
 		fPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, defaultFilePermissions,
 	)
 	if err == nil {
@@ -199,7 +199,7 @@ func (fs *fileStore) loadHistory(fName string) {
 	}()
 	fs.fName = fName
 	fs.fLineNum = 0
-	f, err := os.Open(fName)
+	f, err := os.Open(fName) //nolint:gosec // Ok.
 	if err == nil {
 		err = fs.loadHistoryFile(fName, bufio.NewScanner(f))
 	}
@@ -366,7 +366,7 @@ func (fs *fileStore) addAll(
 	}()
 
 	fPath := fs.dir + string(os.PathSeparator) + fName
-	f, err := os.Open(fPath)
+	f, err := os.Open(fPath) //nolint:gosec // Ok.
 	if err == nil {
 		defer closeAndLogIfError(f)
 		fs.fName = fPath

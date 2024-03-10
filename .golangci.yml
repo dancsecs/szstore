@@ -15,7 +15,6 @@ linters:
   disable:
     - dupl
     - gofumpt
-    - gosec
     - lll
     - nlreturn
     - stylecheck
@@ -47,7 +46,6 @@ issues:
         - goconst
         - cyclo
         - gofumpt
-        - gosec
         - lll
         - maintidx
         - nlreturn

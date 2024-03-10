@@ -49,7 +49,7 @@ func buildHistoryFile(
 		fd += ts + e[1] + "\n"
 	}
 	fPath := filepath.Join(d, f+"_"+chk.ClockLastFmtDate()+fileExtension)
-	err := os.WriteFile(fPath, []byte(fd), 0644)
+	err := os.WriteFile(fPath, []byte(fd), 0o0600)
 	chk.AddSub("{{hPath"+strconv.FormatInt(int64(daysAgo), base10)+"}}", fPath)
 	return err
 }
