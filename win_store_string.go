@@ -38,6 +38,7 @@ func NewString(dir, fName string) *WStoreString {
 	s := newFileStore(dir, fName)
 	newWStoreString := new(WStoreString)
 	newWStoreString.fileStore = s
+
 	return newWStoreString
 }
 
@@ -57,20 +58,25 @@ func (s *WStoreString) parseString(raw string) (string, bool) {
 		if strings.ContainsRune(raw, c) {
 			s.logMsg("parseString: invalid character: " +
 				strconv.Quote(string(c)))
+
 			return "", false
 		}
 	}
+
 	if s.numValidValues > 0 {
 		found := false
 		for i, mi := 0, s.numValidValues; i < mi && !found; i++ {
 			found = s.validValues[i] == raw
 		}
+
 		if !found {
 			s.logMsg("parseString: invalid value: " +
 				strconv.Quote(raw))
+
 			return "", false
 		}
 	}
+
 	return raw, true
 }
 
@@ -80,6 +86,7 @@ func (s *WStoreString) Update(key, value string) error {
 	if !ok {
 		return ErrInvalidStoreString
 	}
+
 	return s.fileStore.update(key, v, float64(len(v)))
 }
 
@@ -92,6 +99,7 @@ func (s *WStoreString) Get(key string) (time.Time, string, bool) {
 			return ts, value, true
 		}
 	}
+
 	return time.Time{}, "", false
 }
 
@@ -100,8 +108,11 @@ func (s *WStoreString) Get(key string) (time.Time, string, bool) {
 func (s *WStoreString) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []string) {
-	var t []time.Time
-	var v []string
+	var (
+		t []time.Time
+		v []string
+	)
+
 	s.fileStore.getHistoryDays(key, days,
 		func(a Action, ts time.Time, raw string) {
 			if a == ActionDelete {
@@ -116,5 +127,6 @@ func (s *WStoreString) GetHistoryDays(
 			}
 		},
 	)
+
 	return t, v
 }

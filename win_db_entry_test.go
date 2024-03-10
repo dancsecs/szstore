@@ -29,7 +29,10 @@ import (
 
 func TestWindowEntry_String(t *testing.T) {
 	chk := sztest.CaptureNothing(t)
+	defer chk.Release()
+
 	var e *windowEntry
+
 	chk.Strf(e.String(), "<nil>", "unexpected return from %v", e)
 
 	chk.ClockSet(
@@ -46,11 +49,15 @@ func TestWindowEntry_Logging(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	var first *windowEntry
-	var last *windowEntry
+	var (
+		first *windowEntry
+		last  *windowEntry
+	)
+
 	ts := time.Date(2020, time.January, 1, 2, 3, 4, 5000, time.Local)
 	next := func() time.Time {
 		ts = ts.Add(time.Second)
+
 		return ts
 	}
 	log := func(l string) {
@@ -60,6 +67,7 @@ func TestWindowEntry_Logging(t *testing.T) {
 			log.Print(l + " FIRST: {" + first.t.Format(fmtTimeStamp) + "," +
 				strconv.FormatFloat(first.f, 'g', -1, 64) + "}")
 		}
+
 		if last == nil {
 			log.Print(l + "  LAST: <nil>")
 		} else {
@@ -68,16 +76,27 @@ func TestWindowEntry_Logging(t *testing.T) {
 		}
 	}
 	log("Uninitialized")
+
 	first = first.newHead(nil, next(), 1)
+
 	log("First Initialized with abc")
+
 	first = first.newHead(nil, next(), 22)
+
 	log("New first def")
+
 	first = first.newHead(nil, next(), 333)
+
 	log("New first ghi")
+
 	first = first.newHead(nil, next(), 4444)
+
 	log("New First jkl")
+
 	first = first.newHead(nil, next(), 55555)
+
 	log("New First mno")
+
 	chk.Log(
 		"Uninitialized FIRST: <nil>",
 		"Uninitialized  LAST: <nil>",

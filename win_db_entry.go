@@ -44,9 +44,11 @@ func (e *windowEntry) newHead(
 	n.t = t
 	n.f = f
 	n.next = e
+
 	if e != nil {
 		e.prev = n
 	}
+
 	return n
 }
 
@@ -54,6 +56,7 @@ func (e *windowEntry) String() string {
 	if e == nil {
 		return "<nil>"
 	}
+
 	return e.t.Format(fmtTimeStamp) +
 		" - " +
 		strconv.FormatFloat(e.f, 'g', -1, 64)
@@ -77,6 +80,7 @@ func newWindow(datKey, winKey string, p time.Duration) *window {
 	if p < time.Nanosecond {
 		p = time.Nanosecond
 	}
+
 	newWin := new(window)
 	newWin.datKey = datKey
 	newWin.winKey = winKey
@@ -97,6 +101,7 @@ func (w *window) addThreshold(
 	if err == nil {
 		w.thresholds = append(w.thresholds, t)
 	}
+
 	return err
 }
 
@@ -111,6 +116,7 @@ func (w *window) add(e *windowEntry) {
 	w.total += e.f
 	w.trim()
 	w.avg = w.total / float64(w.count)
+
 	for _, t := range w.thresholds {
 		t.check(w.avg)
 	}
@@ -121,9 +127,11 @@ func (w *window) trim() {
 		if w.newest == nil {
 			return
 		}
+
 		if w.newest == w.oldest { // Keep last measurement.
 			return
 		}
+
 		if w.newest.t.Sub(w.oldest.t) <= w.period {
 			return
 		}
@@ -146,6 +154,7 @@ func (w *window) getAvg() (float64, error) {
 	if w.count < 1 {
 		return 0, ErrNoWinData
 	}
+
 	return w.avg, nil
 }
 
@@ -153,6 +162,7 @@ func (w *window) getCount() (uint64, error) {
 	if w.count < 1 {
 		return 0, ErrNoWinData
 	}
+
 	return w.count, nil
 }
 
@@ -160,6 +170,7 @@ func (w *window) getCount() (uint64, error) {
 func (w *window) String() string {
 	a, _ := w.getAvg()
 	c, _ := w.getCount()
+
 	return fmt.Sprintf(
 		"datKey: %s winKey: %s Period: %v Newest: %v Oldest: %v Count: %d Avg: %g",
 		w.datKey, w.winKey, w.period, w.newest, w.oldest, c, a,

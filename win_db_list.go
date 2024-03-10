@@ -60,6 +60,7 @@ func (wdb *winDB) addWindow(
 	if p > wdb.maxPeriod {
 		wdb.maxPeriod = p
 	}
+
 	wdb.winKeys = append(wdb.winKeys, winKey)
 	sort.Strings(wdb.winKeys)
 
@@ -72,13 +73,17 @@ func (wdb *winDB) addValue(t time.Time, f float64) {
 	if e != nil {
 		wdb.cachedEntry = e.next
 	}
+
 	wdb.newestEntry = wdb.newestEntry.newHead(e, t, f)
+
 	if wdb.oldestEntry == nil {
 		wdb.oldestEntry = wdb.newestEntry
 	}
+
 	for _, wk := range wdb.winKeys {
 		wdb.windows[wk].add(wdb.newestEntry)
 	}
+
 	wdb.trim()
 }
 
@@ -88,6 +93,7 @@ func (wdb *winDB) getAvg(winKey string) (float64, error) {
 	if !ok {
 		return 0, ErrUnknownWinKey
 	}
+
 	return dw.getAvg()
 }
 
@@ -97,6 +103,7 @@ func (wdb *winDB) getCount(winKey string) (uint64, error) {
 	if !ok {
 		return 0, ErrUnknownWinKey
 	}
+
 	return dw.getCount()
 }
 
@@ -105,9 +112,11 @@ func (wdb *winDB) delete() {
 	for _, w := range wdb.windows {
 		w.delete()
 	}
+
 	if wdb.oldestEntry != nil {
 		wdb.oldestEntry.next = wdb.cachedEntry
 	}
+
 	wdb.cachedEntry = wdb.newestEntry
 	wdb.newestEntry = nil
 	wdb.oldestEntry = nil
@@ -135,6 +144,7 @@ func (wdb *winDB) addThreshold(winKey string,
 	if !ok {
 		return ErrUnknownWinKey
 	}
+
 	return dw.addThreshold(
 		lowCritical, lowWarning, highWarning, highCritical, f,
 	)
@@ -148,6 +158,7 @@ func (wdb *winDB) count() int {
 		n++
 		e = e.next
 	}
+
 	return n
 }
 
@@ -159,6 +170,7 @@ func (wdb *winDB) cachedCount() int {
 		n++
 		e = e.next
 	}
+
 	return n
 }
 
@@ -174,5 +186,6 @@ func (wdb *winDB) String() string {
 	for _, w := range wdb.winKeys {
 		r += "\n\t\t" + wdb.windows[w].String()
 	}
+
 	return r
 }

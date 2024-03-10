@@ -39,6 +39,7 @@ const (
 	fileExtension          = ".dat"
 	rangeErrPrefix         = "range: "
 	syntaxErrPrefix        = "syntax: "
+	base10                 = 10
 )
 
 // dataPoint defines an individual storage entry.
@@ -93,6 +94,7 @@ func (fs *fileStore) logMsg(msg string) bool {
 			fs.fName, fs.fLineNum, fs.fLine,
 		)
 	}
+
 	return false
 }
 
@@ -118,10 +120,12 @@ func (fs *fileStore) Open() error {
 			fs.fileHistory = append(fs.fileHistory, fileInf.Name())
 		}
 	}
+
 	if len(fs.fileHistory) > 0 {
 		for _, n := range fs.fileHistory {
 			fs.loadHistory(fs.dir + string(os.PathSeparator) + n)
 		}
+
 		startingFilePath = fs.dir +
 			string(os.PathSeparator) +
 			fs.fileHistory[len(fs.fileHistory)-1]
@@ -130,18 +134,22 @@ func (fs *fileStore) Open() error {
 	} else {
 		startingFilePath = fs.generateFilePath(fs.ts())
 		log.Print("starting path generated as: " + startingFilePath)
+
 		err = fs.openFile(startingFilePath)
 		if err == nil {
 			var fi os.FileInfo
+
 			fi, err = os.Stat(startingFilePath)
 			if err == nil {
 				fs.fileHistory = append(fs.fileHistory, fi.Name())
 			}
 		}
 	}
+
 	if err == nil {
 		fs.opened = true
 	}
+
 	return err //nolint:wrapcheck // Ok.
 }
 
@@ -166,6 +174,7 @@ func (fs *fileStore) openFile(fPath string) error {
 		fs.currentFileDate = fPath[len(fPath)-12 : len(fPath)-4]
 		fs.currentFile = f
 	}
+
 	return err //nolint:wrapcheck // Ok.
 }
 
@@ -175,6 +184,7 @@ func (fs *fileStore) loadHistoryFile(
 	for scanner.Scan() {
 		fs.fLine = scanner.Text()
 		fs.fLineNum++
+
 		ts, action, datKey, value, ok := fs.splitRecord(fName, fs.fLine)
 		if ok {
 			if action == ActionDelete {
@@ -182,12 +192,14 @@ func (fs *fileStore) loadHistoryFile(
 				if ok {
 					wdb.delete()
 				}
+
 				delete(fs.data, datKey)
 			} else {
 				fs.load(ts, datKey, value)
 			}
 		}
 	}
+
 	return scanner.Err() //nolint:wrapcheck // Ok.
 }
 
@@ -197,17 +209,21 @@ func (fs *fileStore) loadHistory(fName string) {
 		fs.fLineNum = 0
 		fs.fLine = ""
 	}()
+
 	fs.fName = fName
 	fs.fLineNum = 0
+
 	f, err := os.Open(fName) //nolint:gosec // Ok.
 	if err == nil {
 		err = fs.loadHistoryFile(fName, bufio.NewScanner(f))
 	}
+
 	if err != nil {
 		fs.logMsg("loadHistory: " + err.Error())
 	}
 }
 
+//nolint:funlen // Ok.
 func (fs *fileStore) splitRecord(filePath string, data string) (
 	time.Time,
 	Action,
@@ -218,6 +234,7 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 	const proc = "splitRecord: "
 
 	var (
+		err    error
 		ts     time.Time
 		action Action
 		key    string
@@ -233,7 +250,7 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 					strconv.FormatInt(int64(len(f)), 10) + `"`,
 			)
 	}
-	var err error
+
 	//nolint:gosmopolitan // Internal logs are all in local time.
 	ts, err = time.ParseInLocation(fmtTimeStamp, f[0], time.Local)
 	if err != nil {
@@ -247,6 +264,7 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 			proc + "invalid action: \"" + f[1] + `"`,
 		)
 	}
+
 	action = Action([]byte(f[1])[0])
 	if action != ActionUpdate && action != ActionDelete {
 		return ts, action, key, value, fs.logMsg(
@@ -259,11 +277,13 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 			proc + "invalid date mismatch: \"" + f[0][:8] + `"`,
 		)
 	}
+
 	if len(f[2]) < minKeyLength {
 		return ts, action, key, value, fs.logMsg(
 			proc + "invalid key length (>= 2 characters): \"" + f[2] + `"`,
 		)
 	}
+
 	key = f[2]
 	value = f[3]
 
@@ -275,6 +295,7 @@ func (fs *fileStore) load(timeStamp time.Time, key, value string) {
 	if !ok {
 		t = new(dataPoint)
 		fs.data[key] = t
+
 		if _, ok := fs.winDB[key]; !ok {
 			fs.winDB[key] = newWinDB(key)
 		}
@@ -286,8 +307,10 @@ func (fs *fileStore) load(timeStamp time.Time, key, value string) {
 				t.TS.Format(fmtTimeStamp),
 			),
 		)
+
 		return
 	}
+
 	t.TS = timeStamp
 	t.Value = value
 }
@@ -296,10 +319,14 @@ func (fs *fileStore) writeToFile(
 	action Action, key, value string,
 ) (time.Time, error) {
 	var err error
+
 	ts := fs.ts()
+
 	if ts.Format(fmtDateStamp) != fs.currentFileDate {
 		var fi os.FileInfo
+
 		fPath := fs.generateFilePath(ts)
+
 		err = fs.openFile(fPath)
 		if err == nil {
 			fi, err = os.Stat(fPath)
@@ -308,6 +335,7 @@ func (fs *fileStore) writeToFile(
 			}
 		}
 	}
+
 	if err == nil {
 		entry := fmt.Sprintf(
 			"%s|%c|%s|%s\n",
@@ -315,6 +343,7 @@ func (fs *fileStore) writeToFile(
 		)
 		_, err = fs.currentFile.WriteString(entry)
 	}
+
 	return ts, err //nolint:wrapcheck // Ok.
 }
 
@@ -327,7 +356,9 @@ func (fs *fileStore) get(datKey string) (time.Time, string, bool) {
 	if ok {
 		return entry.TS, entry.Value, true
 	}
+
 	log.Printf("get(%q): %v", datKey, ErrUnknownDatKey)
+
 	return time.Time{}, "", false
 }
 
@@ -343,12 +374,14 @@ func (fs *fileStore) getHistoryDays(
 		"_" +
 		fs.ts().AddDate(0, 0, -1*int(days)).Format(fmtDateStamp)
 	found := false
+
 	for _, fi := range fs.fileHistory {
 		if !found {
 			if fi >= minFile {
 				found = true
 			}
 		}
+
 		if found {
 			fs.addAll(fi, id, add)
 		}
@@ -359,6 +392,7 @@ func (fs *fileStore) addAll(
 	fName, idWanted string, add func(Action, time.Time, string),
 ) {
 	var lastTS time.Time
+
 	defer func() {
 		fs.fName = ""
 		fs.fLineNum = 0
@@ -367,15 +401,19 @@ func (fs *fileStore) addAll(
 
 	fPath := fs.dir + string(os.PathSeparator) + fName
 	f, err := os.Open(fPath) //nolint:gosec // Ok.
+
 	if err == nil {
 		defer closeAndLogIfError(f)
+
 		fs.fName = fPath
 		fs.fLineNum = 0
 		s := bufio.NewScanner(f)
+
 		for s.Scan() {
 			fs.fLine = s.Text()
 			fs.fLineNum++
 			ts, action, id, value, ok := fs.splitRecord(fPath, s.Text())
+
 			if ok && id == idWanted {
 				if lastTS.After(ts) {
 					fs.logMsg(
@@ -391,8 +429,10 @@ func (fs *fileStore) addAll(
 				}
 			}
 		}
+
 		err = s.Err()
 	}
+
 	if err != nil {
 		fs.logMsg(
 			fmt.Sprintf("addAll(fName=%q,isWanted=%q): %v", fName, idWanted, err),
@@ -407,12 +447,16 @@ func (fs *fileStore) update(
 	fs.rwMutex.Lock()
 	defer fs.rwMutex.Unlock()
 
-	var err error
-	var ts time.Time
+	var (
+		err error
+		ts  time.Time
+	)
+
 	if len(key) < minKeyLength || strings.Contains(key, groupSeparator) {
 		log.Printf(
 			"update(key=%q,value=%q) invalid key", key, value,
 		)
+
 		return ErrInvalidDatKey
 	}
 
@@ -422,8 +466,10 @@ func (fs *fileStore) update(
 			fmt.Sprintf("update(key=%q,value=%q) failed: %v", key, value, err),
 		)
 	}
+
 	fs.load(ts, key, value)
 	fs.winDB[key].addValue(ts, f)
+
 	return err
 }
 
@@ -436,8 +482,10 @@ func (fs *fileStore) Delete(datKey string) error {
 	if ok {
 		wdb.delete()
 	}
+
 	delete(fs.data, datKey)
 	_, err := fs.writeToFile('D', datKey, "")
+
 	return err
 }
 
@@ -450,9 +498,11 @@ func (fs *fileStore) Close() error {
 	fs.currentFileDate = ""
 	fs.currentFile = nil
 	fs.opened = false
+
 	if fileToClose != nil {
 		closeAndLogIfError(fileToClose)
 	}
+
 	return nil
 }
 
@@ -472,6 +522,7 @@ func (fs *fileStore) AddWindow(
 		winDB = newWinDB(datKey)
 		fs.winDB[datKey] = winDB
 	}
+
 	return winDB.addWindow(winKey, p)
 }
 
@@ -491,6 +542,7 @@ func (fs *fileStore) AddWindowThreshold(datKey, winKey string,
 	if !ok {
 		return ErrUnknownDatKey
 	}
+
 	return dw.addThreshold(winKey,
 		lowCritical, lowWarning, highWarning, highCritical,
 		f,
@@ -506,6 +558,7 @@ func (fs *fileStore) WindowAverage(datKey, winKey string) (float64, error) {
 	if !ok {
 		return 0, ErrUnknownDatKey
 	}
+
 	return dw.getAvg(winKey)
 }
 
@@ -518,5 +571,6 @@ func (fs *fileStore) WindowCount(datKey, winKey string) (uint64, error) {
 	if !ok {
 		return 0, ErrUnknownDatKey
 	}
+
 	return dw.getCount(winKey)
 }

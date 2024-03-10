@@ -14,9 +14,7 @@ linters:
   enable-all: true
   disable:
     - lll
-    - nlreturn
     - varnamelen
-    - wsl
 
     - deadcode # Deprecated
     - exhaustivestruct # Deprecated
@@ -48,14 +46,12 @@ issues:
         - goconst
         - lll
         - maintidx
-        - nlreturn
         - paralleltest
         - prealloc
         - revive
         - testpackage
         - varnamelen
         - wastedassign
-        - wsl
         - unparam
 
 run:

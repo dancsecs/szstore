@@ -94,9 +94,11 @@ func newThreshold(
 	if invalid {
 		return nil, ErrInvalidThresholdOrder
 	}
+
 	if callback == nil {
 		return nil, ErrNilCallback
 	}
+
 	return &threshold{
 		datKey:        datKey,
 		winKey:        winKey,
@@ -114,6 +116,7 @@ func newThreshold(
 // callback function.
 func (d *threshold) check(v float64) {
 	var newReason ThresholdReason
+
 	switch {
 	case v <= d.lowCritical:
 		newReason = ThresholdLowCritical
@@ -126,6 +129,7 @@ func (d *threshold) check(v float64) {
 	default:
 		newReason = ThresholdHighCritical
 	}
+
 	if d.currentReason != newReason {
 		oldReason := d.currentReason
 		d.currentReason = newReason

@@ -30,11 +30,13 @@ func buildHistoryFile(
 	chk *sztest.Chk,
 	daysAgo int, d, f string, data [][2]string,
 ) error {
-	const base10 = 10
 	chk.T().Helper()
+
 	fd := ""
 	resetClk := chk.ClockOffsetDay(-daysAgo)
+
 	chk.ClockAddSub(sztest.ClockSubNano)
+
 	if daysAgo != 0 {
 		defer resetClk()
 	}
@@ -46,10 +48,14 @@ func buildHistoryFile(
 		} else {
 			ts = e[0]
 		}
+
 		fd += ts + e[1] + "\n"
 	}
+
 	fPath := filepath.Join(d, f+"_"+chk.ClockLastFmtDate()+fileExtension)
 	err := os.WriteFile(fPath, []byte(fd), 0o0600)
+
 	chk.AddSub("{{hPath"+strconv.FormatInt(int64(daysAgo), base10)+"}}", fPath)
+
 	return err //nolint:wrapcheck // Ok.
 }

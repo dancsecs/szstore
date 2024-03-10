@@ -42,6 +42,7 @@ func (s *WStoreFloat64) parseFloat64(raw string) (float64, bool) {
 	v, err := strconv.ParseFloat(raw, 64)
 	if err != nil {
 		errMsg := "parseFloat64: invalid "
+
 		switch {
 		case errors.Is(err, strconv.ErrRange):
 			errMsg += rangeErrPrefix
@@ -50,9 +51,12 @@ func (s *WStoreFloat64) parseFloat64(raw string) (float64, bool) {
 			errMsg += syntaxErrPrefix
 			v = 0
 		}
+
 		s.logMsg(errMsg + strconv.Quote(raw))
+
 		return v, false
 	}
+
 	return v, true
 }
 
@@ -72,6 +76,7 @@ func (s *WStoreFloat64) Get(key string) (time.Time, float64, bool) {
 			return ts, value, true
 		}
 	}
+
 	return time.Time{}, 0.0, false
 }
 
@@ -80,8 +85,10 @@ func (s *WStoreFloat64) Get(key string) (time.Time, float64, bool) {
 func (s *WStoreFloat64) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []float64) {
-	var t []time.Time
-	var v []float64
+	var (
+		t []time.Time
+		v []float64
+	)
 
 	s.fileStore.getHistoryDays(
 		key, days, func(a Action, ts time.Time, raw string,
@@ -96,6 +103,8 @@ func (s *WStoreFloat64) GetHistoryDays(
 					v = append(v, v64)
 				}
 			}
-		})
+		},
+	)
+
 	return t, v
 }

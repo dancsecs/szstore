@@ -41,6 +41,7 @@ func (s *WStoreUint32) parseUint32(raw string) (uint32, bool) {
 	v, err := strconv.ParseUint(raw, 10, 32)
 	if err != nil {
 		errMsg := "parseUint32: invalid "
+
 		switch {
 		case errors.Is(err, strconv.ErrRange):
 			errMsg += rangeErrPrefix
@@ -49,9 +50,12 @@ func (s *WStoreUint32) parseUint32(raw string) (uint32, bool) {
 			errMsg += syntaxErrPrefix
 			v = 0
 		}
+
 		s.logMsg(errMsg + strconv.Quote(raw))
+
 		return uint32(v), false
 	}
+
 	return uint32(v), true
 }
 
@@ -71,6 +75,7 @@ func (s *WStoreUint32) Get(key string) (time.Time, uint32, bool) {
 			return ts, value, true
 		}
 	}
+
 	return time.Time{}, 0.0, false
 }
 
@@ -79,8 +84,11 @@ func (s *WStoreUint32) Get(key string) (time.Time, uint32, bool) {
 func (s *WStoreUint32) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []uint32) {
-	var t []time.Time
-	var v []uint32
+	var (
+		t []time.Time
+		v []uint32
+	)
+
 	s.fileStore.getHistoryDays(
 		key, days, func(a Action, ts time.Time, raw string,
 		) {
@@ -94,6 +102,8 @@ func (s *WStoreUint32) GetHistoryDays(
 					v = append(v, v32)
 				}
 			}
-		})
+		},
+	)
+
 	return t, v
 }

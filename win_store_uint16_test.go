@@ -66,6 +66,7 @@ func validateUint16History(
 		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
 		chk.Uint16(v, expVSlice[len(expVSlice)-1], 0)
 	}
+
 	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
 
 	var tSlice []string
@@ -73,6 +74,7 @@ func validateUint16History(
 	for _, ts := range tsSlice {
 		tSlice = append(tSlice, ts.Format(fmtTimeStamp))
 	}
+
 	chk.StrSlice(tSlice, expTSlice)
 	chk.Uint16Slice(vSlice, expVSlice, 0)
 }

@@ -48,11 +48,11 @@ func Test_SzWinStore_ThresholdReasonString(t *testing.T) {
 func TestThresholdData_InvalidParameterOrdering(t *testing.T) {
 	chk := sztest.CaptureNothing(t)
 	defer chk.Release()
+
 	th, err := newThreshold("datKey", "winKey", 2, 1, 3, 4, nil)
-	if th != nil {
-		t.Fatal("unexpected non null threshold returned")
-	}
+
 	chk.Err(err, ErrInvalidThresholdOrder.Error())
+	chk.Nil(th)
 
 	_, err = newThreshold("datKey", "winKey", 1, 3, 2, 4, nil)
 	chk.Err(err, ErrInvalidThresholdOrder.Error())
@@ -69,6 +69,7 @@ func TestThresholdData_InvalidCallbackFunction(t *testing.T) {
 	if th != nil {
 		t.Fatal("unexpected non null threshold returned")
 	}
+
 	chk.Err(
 		err,
 		ErrNilCallback.Error(),
@@ -94,6 +95,7 @@ func TestThresholdData_CallbackFunctions(t *testing.T) {
 	for f = 0; f < 26; f++ {
 		th.check(f)
 	}
+
 	for f = 25; f >= 0; f-- {
 		th.check(f)
 	}

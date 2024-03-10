@@ -185,6 +185,7 @@ func validateBoolHistory(
 		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
 		chk.Bool(v, expVSlice[len(expVSlice)-1], 0)
 	}
+
 	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
 
 	var tSlice []string
@@ -192,6 +193,7 @@ func validateBoolHistory(
 	for _, ts := range tsSlice {
 		tSlice = append(tSlice, ts.Format(fmtTimeStamp))
 	}
+
 	chk.StrSlice(tSlice, expTSlice)
 	chk.BoolSlice(vSlice, expVSlice, 0)
 }
@@ -472,6 +474,7 @@ func TestSzStoreBool_UseCase3(t *testing.T) {
 	_ = boolStore.Update("key2", false)
 	_ = boolStore.Update("key2", true)
 	_ = boolStore.Update("key2", false)
+
 	chk.Log(
 		"opening file based szStore {{file}} in directory {{dir}}",
 		"starting path retrieved as: {{hPath0}}",

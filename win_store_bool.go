@@ -33,6 +33,7 @@ type WStoreBool struct {
 // NewBool a new Store object.
 func NewBool(dir, fName string) *WStoreBool {
 	store := newFileStore(dir, fName)
+
 	return &WStoreBool{
 		fileStore: store,
 	}
@@ -48,6 +49,7 @@ func (s *WStoreBool) parseBool(raw string) (bool, bool) {
 		s.logMsg(
 			"parseBool: invalid syntax: " + strconv.Quote(raw),
 		)
+
 		return false, false
 	}
 }
@@ -66,12 +68,12 @@ func (s *WStoreBool) Update(key string, value bool) error {
 func (s *WStoreBool) Get(datKey string) (time.Time, bool, bool) {
 	ts, v, ok := s.fileStore.get(datKey)
 	if ok {
-		var value bool
-		value, ok = s.parseBool(v)
+		value, ok := s.parseBool(v)
 		if ok {
 			return ts, value, true
 		}
 	}
+
 	return time.Time{}, false, false
 }
 
@@ -80,8 +82,11 @@ func (s *WStoreBool) Get(datKey string) (time.Time, bool, bool) {
 func (s *WStoreBool) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []bool) {
-	var t []time.Time
-	var v []bool
+	var (
+		t []time.Time
+		v []bool
+	)
+
 	s.fileStore.getHistoryDays(
 		key, days, func(a Action, ts time.Time, raw string,
 		) {
@@ -95,7 +100,9 @@ func (s *WStoreBool) GetHistoryDays(
 					v = append(v, vParsed)
 				}
 			}
-		})
+		},
+	)
+
 	return t, v
 }
 

@@ -66,8 +66,10 @@ func validateHistory(
 	chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
 	chk.Str(v, expVSlice[len(expVSlice)-1])
 
-	var tSlice []string
-	var vSlice []string
+	var (
+		tSlice []string
+		vSlice []string
+	)
 
 	s.getHistoryDays(datKey, days, func(a Action, ts time.Time, raw string) {
 		if a == ActionDelete {
@@ -86,13 +88,16 @@ func countFiles(d, f string) int {
 	entries, err := os.ReadDir(d)
 	if err == nil {
 		c := 0
+
 		for _, e := range entries {
 			if strings.HasPrefix(e.Name(), f) {
 				c++
 			}
 		}
+
 		return c
 	}
+
 	return -1
 }
 
@@ -372,6 +377,7 @@ func TestWStoreBase_UpdateDeleteOnClosedFile(t *testing.T) {
 	)
 
 	fPath := filepath.Join(d, f) + "_20000515" + fileExtension
+
 	chk.NoErr(s.Open())
 	chk.NoErr(s.currentFile.Close())
 	chk.Err(
