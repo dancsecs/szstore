@@ -166,6 +166,28 @@ func (fs *fileStore) openFile(fPath string) error {
 	return err
 }
 
+func (fs *fileStore) loadHistoryFile(
+	fName string, scanner *bufio.Scanner,
+) error {
+	for scanner.Scan() {
+		fs.fLine = scanner.Text()
+		fs.fLineNum++
+		ts, action, datKey, value, ok := fs.splitRecord(fName, fs.fLine)
+		if ok {
+			if action == ActionDelete {
+				wdb, ok := fs.winDB[datKey]
+				if ok {
+					wdb.delete()
+				}
+				delete(fs.data, datKey)
+			} else {
+				fs.load(ts, datKey, value)
+			}
+		}
+	}
+	return scanner.Err()
+}
+
 func (fs *fileStore) loadHistory(fName string) {
 	defer func() {
 		fs.fName = ""
@@ -176,24 +198,7 @@ func (fs *fileStore) loadHistory(fName string) {
 	fs.fLineNum = 0
 	f, err := os.Open(fName)
 	if err == nil {
-		s := bufio.NewScanner(f)
-		for s.Scan() {
-			fs.fLine = s.Text()
-			fs.fLineNum++
-			ts, action, datKey, value, ok := fs.splitRecord(fName, fs.fLine)
-			if ok {
-				if action == ActionDelete {
-					wdb, ok := fs.winDB[datKey]
-					if ok {
-						wdb.delete()
-					}
-					delete(fs.data, datKey)
-				} else {
-					fs.load(ts, datKey, value)
-				}
-			}
-		}
-		err = s.Err()
+		err = fs.loadHistoryFile(fName, bufio.NewScanner(f))
 	}
 	if err != nil {
 		fs.logMsg("loadHistory: " + err.Error())
