@@ -50,7 +50,7 @@ func (s *WStoreFloat32) parseFloat32(raw string) (float32, bool) {
 			errMsg += "syntax: "
 			v = 0
 		}
-		s.logErr(errors.New(errMsg + strconv.Quote(raw)))
+		s.logMsg(errMsg + strconv.Quote(raw))
 		return float32(v), false
 	}
 	return float32(v), true

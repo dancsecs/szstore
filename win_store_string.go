@@ -19,7 +19,6 @@
 package szstore
 
 import (
-	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -56,8 +55,8 @@ func (s *WStoreString) SetValidValues(v []string) {
 func (s *WStoreString) parseString(raw string) (string, bool) {
 	for _, c := range s.invalidChars {
 		if strings.ContainsRune(raw, c) {
-			s.logErr(errors.New("parseString: invalid character: " +
-				strconv.Quote(string(c))))
+			s.logMsg("parseString: invalid character: " +
+				strconv.Quote(string(c)))
 			return "", false
 		}
 	}
@@ -67,8 +66,8 @@ func (s *WStoreString) parseString(raw string) (string, bool) {
 			found = s.validValues[i] == raw
 		}
 		if !found {
-			s.logErr(errors.New("parseString: invalid value: " +
-				strconv.Quote(raw)))
+			s.logMsg("parseString: invalid value: " +
+				strconv.Quote(raw))
 			return "", false
 		}
 	}

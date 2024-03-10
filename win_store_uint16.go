@@ -49,7 +49,7 @@ func (s *WStoreUint16) parseUint16(raw string) (uint16, bool) {
 			errMsg += "syntax: "
 			v = 0
 		}
-		s.logErr(errors.New(errMsg + strconv.Quote(raw)))
+		s.logMsg(errMsg + strconv.Quote(raw))
 		return uint16(v), false
 	}
 	return uint16(v), true

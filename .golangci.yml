@@ -15,7 +15,6 @@ linters:
   disable:
     - dupl
     - dupword
-    - goerr113
     - goconst
     - gofumpt
     - gosec
@@ -45,15 +44,6 @@ issues:
   max-issues-per-linter: 0
   max-same-issues: 0
   exclude-rules:
-    - path: ck_.+\.go  # Exclude on type check methods.
-      linters:
-        - dupl
-    - path: cfg_validate_test\.go 
-      linters:
-        - dupl
-    - path: chk_test\.go 
-      linters:
-        - dupl
     - path: _test\.go  # Exclude on test files.
       linters:
         - depguard
@@ -61,7 +51,6 @@ issues:
         - funlen
         - goconst
         - cyclo
-        - goerr113
         - gofumpt
         - gosec
         - gosmopolitan

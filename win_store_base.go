@@ -20,7 +20,6 @@ package szstore
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -83,11 +82,11 @@ func newFileStore(dir, fileNameRoot string) *fileStore {
 	return fs
 }
 
-func (fs *fileStore) logErr(err error) bool {
+func (fs *fileStore) logMsg(msg string) bool {
 	if fs.fName == "" {
-		log.Print(err.Error())
+		log.Print(msg)
 	} else {
-		log.Printf(err.Error()+": %s:%d - %q",
+		log.Printf(msg+": %s:%d - %q",
 			fs.fName, fs.fLineNum, fs.fLine,
 		)
 	}
@@ -197,7 +196,7 @@ func (fs *fileStore) loadHistory(fName string) {
 		err = s.Err()
 	}
 	if err != nil {
-		fs.logErr(fmt.Errorf("loadHistory: %w", err))
+		fs.logMsg("loadHistory: " + err.Error())
 	}
 }
 
@@ -213,46 +212,40 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 	f := strings.SplitN(data, groupSeparator, expectedNumberOfFields)
 	if len(f) != expectedNumberOfFields {
 		return ts, action, key, value,
-			fs.logErr(
-				errors.New(
-					proc +
-						"invalid number of fields: \"" +
-						strconv.FormatInt(int64(len(f)), 10) + `"`,
-				),
+			fs.logMsg(
+				proc +
+					"invalid number of fields: \"" +
+					strconv.FormatInt(int64(len(f)), 10) + `"`,
 			)
 	}
 	var err error
 	ts, err = time.ParseInLocation(fmtTimeStamp, f[0], time.Local)
 	if err != nil {
-		return ts, action, key, value, fs.logErr(
-			errors.New(proc + "invalid date: \"" + f[0] + `"`),
+		return ts, action, key, value, fs.logMsg(
+			proc + "invalid date: \"" + f[0] + `"`,
 		)
 	}
 
 	if len(f[1]) != 1 {
-		return ts, action, key, value, fs.logErr(
-			errors.New(proc + "invalid action: \"" + f[1] + `"`),
+		return ts, action, key, value, fs.logMsg(
+			proc + "invalid action: \"" + f[1] + `"`,
 		)
 	}
 	action = Action([]byte(f[1])[0])
 	if action != ActionUpdate && action != ActionDelete {
-		return ts, action, key, value, fs.logErr(
-			errors.New(proc + "invalid action: \"" + f[1] + `"`),
+		return ts, action, key, value, fs.logMsg(
+			proc + "invalid action: \"" + f[1] + `"`,
 		)
 	}
 
 	if !strings.HasPrefix(f[0], filePath[len(filePath)-12:len(filePath)-4]) {
-		return ts, action, key, value, fs.logErr(
-			errors.New(proc + "invalid date mismatch: \"" +
-				f[0][:8] + `"`,
-			),
+		return ts, action, key, value, fs.logMsg(
+			proc + "invalid date mismatch: \"" + f[0][:8] + `"`,
 		)
 	}
 	if len(f[2]) < minKeyLength {
-		return ts, action, key, value, fs.logErr(
-			errors.New(proc + "invalid key length (>= 2 characters): \"" +
-				f[2] + `"`,
-			),
+		return ts, action, key, value, fs.logMsg(
+			proc + "invalid key length (>= 2 characters): \"" + f[2] + `"`,
 		)
 	}
 	key = f[2]
@@ -270,8 +263,8 @@ func (fs *fileStore) load(timeStamp time.Time, key, value string) {
 			fs.winDB[key] = newWinDB(key)
 		}
 	} else if t.Ts.After(timeStamp) {
-		fs.logErr(
-			fmt.Errorf("load: invalid timestamp out of sequence:"+
+		fs.logMsg(
+			fmt.Sprintf("load: invalid timestamp out of sequence:"+
 				" received date: %s last date: %s",
 				timeStamp.Format(fmtTimeStamp),
 				t.Ts.Format(fmtTimeStamp),
@@ -369,8 +362,8 @@ func (fs *fileStore) addAll(
 			ts, action, id, value, ok := fs.splitRecord(fPath, s.Text())
 			if ok && id == idWanted {
 				if lastTS.After(ts) {
-					fs.logErr(
-						fmt.Errorf("addAll: invalid timestamp out of sequence:"+
+					fs.logMsg(
+						fmt.Sprintf("addAll: invalid timestamp out of sequence:"+
 							" received date: %s last date: %s",
 							ts.Format(fmtTimeStamp),
 							lastTS.Format(fmtTimeStamp),
@@ -385,8 +378,8 @@ func (fs *fileStore) addAll(
 		err = s.Err()
 	}
 	if err != nil {
-		fs.logErr(
-			fmt.Errorf("addAll(fName=%q,isWanted=%q): %w", fName, idWanted, err),
+		fs.logMsg(
+			fmt.Sprintf("addAll(fName=%q,isWanted=%q): %v", fName, idWanted, err),
 		)
 	}
 }
@@ -409,8 +402,8 @@ func (fs *fileStore) update(
 
 	ts, err = fs.writeToFile('U', key, value)
 	if err != nil {
-		fs.logErr(
-			fmt.Errorf("update(key=%q,value=%q) failed: %w", key, value, err),
+		fs.logMsg(
+			fmt.Sprintf("update(key=%q,value=%q) failed: %v", key, value, err),
 		)
 	}
 	fs.load(ts, key, value)

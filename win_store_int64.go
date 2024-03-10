@@ -49,7 +49,7 @@ func (s *WStoreInt64) parseInt64(raw string) (int64, bool) {
 			errMsg += "syntax: "
 			v = 0
 		}
-		s.logErr(errors.New(errMsg + strconv.Quote(raw)))
+		s.logMsg(errMsg + strconv.Quote(raw))
 		return v, false
 	}
 	return v, true

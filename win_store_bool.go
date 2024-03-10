@@ -19,7 +19,6 @@
 package szstore
 
 import (
-	"errors"
 	"strconv"
 	"time"
 )
@@ -46,8 +45,8 @@ func (s *WStoreBool) parseBool(raw string) (bool, bool) {
 	case "true":
 		return true, true
 	default:
-		s.logErr(
-			errors.New("parseBool: invalid syntax: " + strconv.Quote(raw)),
+		s.logMsg(
+			"parseBool: invalid syntax: " + strconv.Quote(raw),
 		)
 		return false, false
 	}
