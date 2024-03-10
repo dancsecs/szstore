@@ -17,7 +17,6 @@ linters:
     - goconst
     - gofumpt
     - gosec
-    - gosmopolitan
     - lll
     - nestif
     - nlreturn
