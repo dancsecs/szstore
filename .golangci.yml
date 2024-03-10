@@ -52,10 +52,8 @@ issues:
         - maintidx
         - paralleltest
         - prealloc
-        - revive
         - testpackage
         - wastedassign
-        - unparam
 
 run:
   timeout: 5m

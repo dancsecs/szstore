@@ -351,12 +351,11 @@ func TestWindowWindow_TestThresholds(t *testing.T) {
 	callbackTriggered := false
 
 	chk.NoErr(
-		window.addThreshold(1, 3, 5, 7, func(datKey, winKey string,
-			f, t ThresholdReason,
-			avg float64,
-		) {
-			callbackTriggered = avg == 100.0 && t == ThresholdHighCritical
-		}),
+		window.addThreshold(1, 3, 5, 7,
+			func(_, _ string, _, t ThresholdReason, avg float64) {
+				callbackTriggered = avg == 100.0 && t == ThresholdHighCritical
+			},
+		),
 	)
 
 	window.add(&windowEntry{

@@ -51,7 +51,7 @@ func validateInt32History(
 	chk *sztest.Chk,
 	int32Store *WStoreInt32,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 0.
 	expTSlice []string,
 	expVSlice []int32,
 ) {

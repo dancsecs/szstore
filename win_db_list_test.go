@@ -450,11 +450,9 @@ func TestWindowWindows_Thresholds(t *testing.T) {
 	chk.NoErr(winDB.addWindow("winKey2", time.Second*2))
 
 	chk.Err(
-		winDB.addThreshold("unknownWinKey", 2, 4, 6, 8, func(datKey, winKey string,
-			f, t ThresholdReason,
-			avg float64,
-		) {
-		}),
+		winDB.addThreshold("unknownWinKey", 2, 4, 6, 8,
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
+			}),
 		ErrUnknownWinKey.Error(),
 	)
 
@@ -462,22 +460,18 @@ func TestWindowWindows_Thresholds(t *testing.T) {
 	callback2Triggered := false
 
 	chk.NoErr(
-		winDB.addThreshold("winKey1", 1, 3, 5, 7, func(datKey, winKey string,
-			f, t ThresholdReason,
-			avg float64,
-		) {
-			callback1Triggered = avg == 100.0 && t == ThresholdHighCritical
-		},
+		winDB.addThreshold("winKey1", 1, 3, 5, 7,
+			func(_, _ string, _, t ThresholdReason, avg float64) {
+				callback1Triggered = avg == 100.0 && t == ThresholdHighCritical
+			},
 		),
 	)
 
 	chk.NoErr(
-		winDB.addThreshold("winKey2", 1, 3, 5, 7, func(datKey, winKey string,
-			f, t ThresholdReason,
-			avg float64,
-		) {
-			callback2Triggered = avg == 100.0 && t == ThresholdHighCritical
-		},
+		winDB.addThreshold("winKey2", 1, 3, 5, 7,
+			func(_, _ string, _, t ThresholdReason, avg float64) {
+				callback2Triggered = avg == 100.0 && t == ThresholdHighCritical
+			},
 		),
 	)
 

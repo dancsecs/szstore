@@ -51,7 +51,7 @@ func validateInt8History(
 	chk *sztest.Chk,
 	int8Store *WStoreInt8,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 0.
 	expTSlice []string,
 	expVSlice []int8,
 ) {

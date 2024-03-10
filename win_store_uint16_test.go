@@ -51,7 +51,7 @@ func validateUint16History(
 	chk *sztest.Chk,
 	uint16Store *WStoreUint16,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 0.
 	expTSlice []string,
 	expVSlice []uint16,
 ) {

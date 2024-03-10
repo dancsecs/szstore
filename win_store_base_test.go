@@ -56,7 +56,7 @@ func validateHistory(
 	chk *sztest.Chk,
 	fStore *fileStore,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 2.
 	expTSlice, expVSlice []string,
 ) {
 	chk.T().Helper()
@@ -569,18 +569,18 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	)
 
 	chk.Err(
-		fStore.AddWindowThreshold("unknown", "unknown", 1, 2, 3, 4, func(
-			d, k string, f, t ThresholdReason, v float64,
-		) {
-		}),
+		fStore.AddWindowThreshold("unknown", "unknown", 1, 2, 3, 4,
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
+			},
+		),
 		ErrUnknownDatKey.Error(),
 	)
 
 	chk.Err(
-		fStore.AddWindowThreshold("key1", "unknown", 1, 3, 6, 8, func(
-			d, k string, f, t ThresholdReason, v float64,
-		) {
-		}),
+		fStore.AddWindowThreshold("key1", "unknown", 1, 3, 6, 8,
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
+			},
+		),
 		ErrUnknownWinKey.Error(),
 	)
 
@@ -626,10 +626,10 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	)
 
 	chk.Err(
-		fStore.AddWindowThreshold("key1", "win1", 1, 2, 3, 4, func(
-			datKey, winKey string, from, to ThresholdReason, v float64,
-		) {
-		}),
+		fStore.AddWindowThreshold("key1", "win1", 1, 2, 3, 4,
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
+			},
+		),
 		ErrOpenedWindowThreshold.Error(),
 	)
 

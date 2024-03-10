@@ -51,7 +51,7 @@ func validateStringHistory(
 	chk *sztest.Chk,
 	stringStore *WStoreString,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 0.
 	expTSlice, expVSlice []string,
 ) {
 	chk.T().Helper()

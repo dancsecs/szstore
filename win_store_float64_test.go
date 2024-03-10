@@ -51,7 +51,7 @@ func validateFloat64History(
 	chk *sztest.Chk,
 	float64Store *WStoreFloat64,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 0.
 	expTSlice []string,
 	expVSlice []float64,
 ) {

@@ -52,7 +52,7 @@ func validateBoolHistory(
 	chk *sztest.Chk,
 	boolStore *WStoreBool,
 	datKey string,
-	days uint,
+	days uint, //nolint:unparam // Always a 0.
 	expTSlice []string,
 	expVSlice []bool,
 ) {
@@ -103,7 +103,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 1.2, 0.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -111,7 +111,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 1.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -119,7 +119,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 1.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -127,7 +127,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, 1.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -135,7 +135,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", -0.2, 0.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -143,7 +143,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, -0.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -151,7 +151,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, -0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -159,7 +159,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, -0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidBoolThreshold.Error(),
@@ -167,7 +167,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.4, 0.2, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidThresholdOrder.Error(),
@@ -175,7 +175,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.6, 0.4, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidThresholdOrder.Error(),
@@ -183,7 +183,7 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 
 	chk.Err(
 		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.8, 0.6,
-			func(k, w string, o, n ThresholdReason, v float64) {
+			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
 		ErrInvalidThresholdOrder.Error(),
