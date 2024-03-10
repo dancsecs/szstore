@@ -66,6 +66,7 @@ func TestWindowStorePublic_UnknownDuplicateWindows(t *testing.T) {
 	chk.Uint64(count, 0, 0)
 }
 
+//nolint:maintidx // Ok.
 func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 	chk := sztest.CaptureNothing(t)
 	defer chk.Release()

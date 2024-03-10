@@ -49,7 +49,6 @@ issues:
         - funlen
         - goconst
         - lll
-        - maintidx
         - paralleltest
         - testpackage
 
