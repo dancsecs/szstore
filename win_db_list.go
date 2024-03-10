@@ -66,7 +66,7 @@ func (wdb *winDB) addWindow(
 	return nil
 }
 
-// addValue incorporates a new value into into the underlying store.
+// addValue incorporates a new value into the underlying store.
 func (wdb *winDB) addValue(t time.Time, f float64) {
 	e := wdb.cachedEntry
 	if e != nil {
