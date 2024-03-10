@@ -219,6 +219,7 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 			)
 	}
 	var err error
+	//nolint:gosmopolitan // Internal logs are all in local time.
 	ts, err = time.ParseInLocation(fmtTimeStamp, f[0], time.Local)
 	if err != nil {
 		return ts, action, key, value, fs.logMsg(
