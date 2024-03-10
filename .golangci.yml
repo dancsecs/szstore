@@ -52,7 +52,6 @@ issues:
         - maintidx
         - paralleltest
         - testpackage
-        - wastedassign
 
 run:
   timeout: 5m

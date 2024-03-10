@@ -42,7 +42,8 @@ func buildHistoryFile(
 	}
 
 	for _, entry := range data {
-		timestamp := ""
+		var timestamp string
+
 		if entry[0] == "" {
 			timestamp = chk.ClockNextFmtNano()
 		} else {
