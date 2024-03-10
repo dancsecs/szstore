@@ -127,7 +127,7 @@ func TestWStoreBase_EmptyDirectory(t *testing.T) {
 		"",
 	)
 
-	fPath := filepath.Join(d, f) + "_" + chk.ClockLastFmtDate() + ".dat"
+	fPath := filepath.Join(d, f) + "_" + chk.ClockLastFmtDate() + fileExtension
 	chk.Log(
 		`opening file based szStore {{file}} in directory {{dir}}`,
 		`starting path generated as: `+fPath,
@@ -371,7 +371,7 @@ func TestWStoreBase_UpdateDeleteOnClosedFile(t *testing.T) {
 		time.Second,
 	)
 
-	fPath := filepath.Join(d, f) + "_20000515.dat"
+	fPath := filepath.Join(d, f) + "_20000515" + fileExtension
 	chk.NoErr(s.Open())
 	chk.NoErr(s.currentFile.Close())
 	chk.Err(

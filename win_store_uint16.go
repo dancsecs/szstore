@@ -43,10 +43,10 @@ func (s *WStoreUint16) parseUint16(raw string) (uint16, bool) {
 		errMsg := "parseUint16: invalid "
 		switch {
 		case errors.Is(err, strconv.ErrRange):
-			errMsg += "range: "
+			errMsg += rangeErrPrefix
 			v = 0
 		default: //  errors.Is(err, strconv.ErrSyntax):
-			errMsg += "syntax: "
+			errMsg += syntaxErrPrefix
 			v = 0
 		}
 		s.logMsg(errMsg + strconv.Quote(raw))

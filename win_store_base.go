@@ -36,6 +36,9 @@ const (
 	minKeyLength           = 2
 	fmtTimeStamp           = "20060102150405.000000000"
 	fmtDateStamp           = "20060102"
+	fileExtension          = ".dat"
+	rangeErrPrefix         = "range: "
+	syntaxErrPrefix        = "syntax: "
 )
 
 // dataPoint defines an individual storage entry.
@@ -146,7 +149,7 @@ func (fs *fileStore) generateFilePath(t time.Time) string {
 	return fs.dir +
 		string(os.PathSeparator) +
 		fs.fileNameRoot + "_" +
-		t.Format(fmtDateStamp) + ".dat"
+		t.Format(fmtDateStamp) + fileExtension
 }
 
 func (fs *fileStore) openFile(fPath string) error {

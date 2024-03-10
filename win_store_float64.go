@@ -44,10 +44,10 @@ func (s *WStoreFloat64) parseFloat64(raw string) (float64, bool) {
 		errMsg := "parseFloat64: invalid "
 		switch {
 		case errors.Is(err, strconv.ErrRange):
-			errMsg += "range: "
+			errMsg += rangeErrPrefix
 			v = math.NaN()
 		default: //  errors.Is(err, strconv.ErrSyntax):
-			errMsg += "syntax: "
+			errMsg += syntaxErrPrefix
 			v = 0
 		}
 		s.logMsg(errMsg + strconv.Quote(raw))
