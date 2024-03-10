@@ -102,7 +102,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 1.2, 0.4, 0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 1.2, 0.4, 0.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -110,7 +111,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 1.4, 0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 1.4, 0.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -118,7 +120,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 1.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.4, 1.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -126,7 +129,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, 1.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.4, 0.6, 1.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -134,7 +138,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", -0.2, 0.4, 0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", -0.2, 0.4, 0.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -142,7 +147,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, -0.4, 0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, -0.4, 0.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -150,7 +156,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, -0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.4, -0.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -158,7 +165,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, -0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.4, 0.6, -0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -166,7 +174,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.4, 0.2, 0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.4, 0.2, 0.6, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -174,7 +183,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.6, 0.4, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.6, 0.4, 0.8,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -182,7 +192,8 @@ func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	)
 
 	chk.Err(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.8, 0.6,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.4, 0.8, 0.6,
 			func(_, _ string, _, _ ThresholdReason, _ float64) {
 			},
 		),
@@ -219,12 +230,12 @@ func Test_WStoreBool_UseCase(t *testing.T) {
 	chk.NoErr(boolStore.Open())
 	defer closeAndLogIfError(boolStore)
 
-	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano2
+	validateBoolHistory(chk, boolStore, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]bool{},
 	)
 
-	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano2
+	validateBoolHistory(chk, boolStore, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]bool{},
 	)
@@ -232,12 +243,12 @@ func Test_WStoreBool_UseCase(t *testing.T) {
 	chk.NoErr(boolStore.Update("key1", true))  // clkNano4
 	chk.NoErr(boolStore.Update("key2", false)) // clkNano5
 
-	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano6
+	validateBoolHistory(chk, boolStore, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]bool{true},
 	)
 
-	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano7
+	validateBoolHistory(chk, boolStore, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]bool{false},
 	)
@@ -245,12 +256,12 @@ func Test_WStoreBool_UseCase(t *testing.T) {
 	chk.NoErr(boolStore.Delete("key1")) // clkNano8
 	chk.NoErr(boolStore.Delete("key2")) // clkNano9
 
-	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano10
+	validateBoolHistory(chk, boolStore, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]bool{},
 	)
 
-	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano11
+	validateBoolHistory(chk, boolStore, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]bool{},
 	)
@@ -258,12 +269,12 @@ func Test_WStoreBool_UseCase(t *testing.T) {
 	chk.NoErr(boolStore.Update("key1", false)) // clkNano12
 	chk.NoErr(boolStore.Update("key2", true))  // clkNano13
 
-	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano14
+	validateBoolHistory(chk, boolStore, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]bool{false},
 	)
 
-	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano15
+	validateBoolHistory(chk, boolStore, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]bool{true},
 	)
@@ -325,9 +336,12 @@ func TestSzStoreBool_UseCase3(t *testing.T) {
 	)
 
 	chk.NoErr(
-		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, 0.8,
+		boolStore.AddWindowThreshold(
+			"key2", "18Milliseconds", 0.2, 0.4, 0.6, 0.8,
 			func(k, w string, o, n ThresholdReason, v float64) {
-				log.Printf("Threshold change for key: %s window: %s old: %20s, new %20s for: %f",
+				log.Printf(
+					"Threshold change for key: %s window: %s "+
+						"old: %20s, new %20s for: %f",
 					k, w, o, n, v)
 			},
 		),
@@ -478,6 +492,7 @@ func TestSzStoreBool_UseCase3(t *testing.T) {
 	_ = boolStore.Update("key2", true)
 	_ = boolStore.Update("key2", false)
 
+	//nolint:lll // OK.
 	chk.Log(
 		"opening file based szStore {{file}} in directory {{dir}}",
 		"starting path retrieved as: {{hPath0}}",

@@ -99,12 +99,12 @@ func Test_WStoreUint8_UseCase(t *testing.T) {
 	chk.NoErr(uint8Store.Open())
 	defer closeAndLogIfError(uint8Store)
 
-	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano2
+	validateUint8History(chk, uint8Store, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]uint8{},
 	)
 
-	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano2
+	validateUint8History(chk, uint8Store, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]uint8{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreUint8_UseCase(t *testing.T) {
 	chk.NoErr(uint8Store.Update("key1", 20)) // clkNano4
 	chk.NoErr(uint8Store.Update("key2", 40)) // clkNano5
 
-	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano6
+	validateUint8History(chk, uint8Store, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint8{20},
 	)
 
-	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano7
+	validateUint8History(chk, uint8Store, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint8{40},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreUint8_UseCase(t *testing.T) {
 	chk.NoErr(uint8Store.Delete("key1")) // clkNano8
 	chk.NoErr(uint8Store.Delete("key2")) // clkNano9
 
-	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano10
+	validateUint8History(chk, uint8Store, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]uint8{},
 	)
 
-	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano11
+	validateUint8History(chk, uint8Store, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]uint8{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreUint8_UseCase(t *testing.T) {
 	chk.NoErr(uint8Store.Update("key1", 22)) // clkNano12
 	chk.NoErr(uint8Store.Update("key2", 44)) // clkNano13
 
-	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano14
+	validateUint8History(chk, uint8Store, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint8{22},
 	)
 
-	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano15
+	validateUint8History(chk, uint8Store, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint8{44},
 	)

@@ -99,12 +99,12 @@ func Test_WStoreInt_UseCase(t *testing.T) {
 	chk.NoErr(intStore.Open())
 	defer closeAndLogIfError(intStore)
 
-	validateIntHistory(chk, intStore, "key1", 0, // advances to clkNano2
+	validateIntHistory(chk, intStore, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]int{},
 	)
 
-	validateIntHistory(chk, intStore, "key2", 0, // advances to clkNano2
+	validateIntHistory(chk, intStore, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]int{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreInt_UseCase(t *testing.T) {
 	chk.NoErr(intStore.Update("key1", 200))  // clkNano4
 	chk.NoErr(intStore.Update("key2", -200)) // clkNano5
 
-	validateIntHistory(chk, intStore, "key1", 0, // advances to clkNano6
+	validateIntHistory(chk, intStore, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]int{200},
 	)
 
-	validateIntHistory(chk, intStore, "key2", 0, // advances to clkNano7
+	validateIntHistory(chk, intStore, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]int{-200},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreInt_UseCase(t *testing.T) {
 	chk.NoErr(intStore.Delete("key1")) // clkNano8
 	chk.NoErr(intStore.Delete("key2")) // clkNano9
 
-	validateIntHistory(chk, intStore, "key1", 0, // advances to clkNano10
+	validateIntHistory(chk, intStore, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]int{},
 	)
 
-	validateIntHistory(chk, intStore, "key2", 0, // advances to clkNano11
+	validateIntHistory(chk, intStore, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]int{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreInt_UseCase(t *testing.T) {
 	chk.NoErr(intStore.Update("key1", 222))  // clkNano12
 	chk.NoErr(intStore.Update("key2", -222)) // clkNano13
 
-	validateIntHistory(chk, intStore, "key1", 0, // advances to clkNano14
+	validateIntHistory(chk, intStore, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]int{222},
 	)
 
-	validateIntHistory(chk, intStore, "key2", 0, // advances to clkNano15
+	validateIntHistory(chk, intStore, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]int{-222},
 	)

@@ -119,22 +119,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 1 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano0}} - 2 Oldest: {{clkNano0}} - 2 " +
-				"Count: 1 Avg: 2", // 2 = 2 / 1 = 2
+				"Count: 1 Avg: 2", // 2=2/1=2
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano0}} - 2 Oldest: {{clkNano0}} - 2 " +
-				"Count: 1 Avg: 2", // 2 = 2 / 1 = 2
+				"Count: 1 Avg: 2", // 2=2/1=2
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano0}} - 2 Oldest: {{clkNano0}} - 2 " +
-				"Count: 1 Avg: 2", // 2 = 2 / 1 = 2
+				"Count: 1 Avg: 2", // 2=2/1=2
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano0}} - 2 Oldest: {{clkNano0}} - 2 " +
-				"Count: 1 Avg: 2", // 2 = 2 / 1 = 2
+				"Count: 1 Avg: 2", // 2=2/1=2
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano0}} - 2 Oldest: {{clkNano0}} - 2 " +
-				"Count: 1 Avg: 2", // 2 = 2 / 1 = 2
+				"Count: 1 Avg: 2", // 2=2/1=2
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano0}} - 2 Oldest: {{clkNano0}} - 2 " +
-				"Count: 1 Avg: 2", // 2 = 2 / 1 = 2
+				"Count: 1 Avg: 2", // 2=2/1=2
 		},
 	)
 
@@ -146,22 +146,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 2 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano1}} - 4 Oldest: {{clkNano0}} - 2 " +
-				"Count: 2 Avg: 3", // 4 + 2 = 6 / 2 = 3
+				"Count: 2 Avg: 3", // 4+2=6/2=3
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano1}} - 4 Oldest: {{clkNano0}} - 2 " +
-				"Count: 2 Avg: 3", // 4 + 2 = 6 / 2 = 3
+				"Count: 2 Avg: 3", // 4+2=6/2=3
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano1}} - 4 Oldest: {{clkNano0}} - 2 " +
-				"Count: 2 Avg: 3", // 4 + 2 = 6 / 2 = 3
+				"Count: 2 Avg: 3", // 4+2=6/2=3
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano1}} - 4 Oldest: {{clkNano0}} - 2 " +
-				"Count: 2 Avg: 3", // 4 + 2 = 6 / 2 = 3
+				"Count: 2 Avg: 3", // 4+2=6/2=3
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano1}} - 4 Oldest: {{clkNano0}} - 2 " +
-				"Count: 2 Avg: 3", // 4 + 2 = 6 / 2 = 3
+				"Count: 2 Avg: 3", // 4+2=6/2=3
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano1}} - 4 Oldest: {{clkNano0}} - 2 " +
-				"Count: 2 Avg: 3", // 4 + 2 = 6 / 2 = 3
+				"Count: 2 Avg: 3", // 4+2=6/2=3
 		},
 	)
 
@@ -173,22 +173,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 3 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano2}} - 6 Oldest: {{clkNano1}} - 4 " +
-				"Count: 2 Avg: 5", // 6 + 4 = 10 / 2 = 5
+				"Count: 2 Avg: 5", // 6+4=10/2=5
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano2}} - 6 Oldest: {{clkNano0}} - 2 " +
-				"Count: 3 Avg: 4", // 6 + 4 + 2 = 12 / 3 = 4
+				"Count: 3 Avg: 4", // 6+4+2=12/3=4
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano2}} - 6 Oldest: {{clkNano0}} - 2 " +
-				"Count: 3 Avg: 4", // 6 + 4 + 2 = 12 / 3 = 4
+				"Count: 3 Avg: 4", // 6+4+2=12/3=4
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano2}} - 6 Oldest: {{clkNano0}} - 2 " +
-				"Count: 3 Avg: 4", // 6 + 4 + 2 = 12 / 3 = 4
+				"Count: 3 Avg: 4", // 6+4+2=12/3=4
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano2}} - 6 Oldest: {{clkNano0}} - 2 " +
-				"Count: 3 Avg: 4", // 6 + 4 + 2 = 12 / 3 = 4
+				"Count: 3 Avg: 4", // 6+4+2=12/3=4
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano2}} - 6 Oldest: {{clkNano0}} - 2 " +
-				"Count: 3 Avg: 4", // 6 + 4 + 2 = 12 / 3 = 4
+				"Count: 3 Avg: 4", // 6+4+2=12/3=4
 		},
 	)
 
@@ -200,22 +200,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 4 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano3}} - 8 Oldest: {{clkNano2}} - 6 " +
-				"Count: 2 Avg: 7", // 8 + 6 = 14 / 2 = 7
+				"Count: 2 Avg: 7", // 8+6=14/2=7
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano3}} - 8 Oldest: {{clkNano1}} - 4 " +
-				"Count: 3 Avg: 6", // 8 + 6 + 4 = 18 / 3 = 6
+				"Count: 3 Avg: 6", // 8+6+4=18/3=6
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano3}} - 8 Oldest: {{clkNano0}} - 2 " +
-				"Count: 4 Avg: 5", // 8 + 6 + 4 + 2 = 20 / 4 = 5
+				"Count: 4 Avg: 5", // 8+6+4+2=20/4=5
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano3}} - 8 Oldest: {{clkNano0}} - 2 " +
-				"Count: 4 Avg: 5", // 8 + 6 + 4 + 2 = 20 / 4 = 5
+				"Count: 4 Avg: 5", // 8+6+4+2=20/4=5
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano3}} - 8 Oldest: {{clkNano0}} - 2 " +
-				"Count: 4 Avg: 5", // 8 + 6 + 4 + 2 = 20 / 4 = 5
+				"Count: 4 Avg: 5", // 8+6+4+2=20/4=5
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano3}} - 8 Oldest: {{clkNano0}} - 2 " +
-				"Count: 4 Avg: 5", // 8 + 6 + 4 + 2 = 20 / 4 = 5
+				"Count: 4 Avg: 5", // 8+6+4+2=20/4=5
 		},
 	)
 
@@ -227,22 +227,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 5 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano4}} - 10 Oldest: {{clkNano3}} - 8 " +
-				"Count: 2 Avg: 9", // 10 + 8 = 18 / 2 = 9
+				"Count: 2 Avg: 9", // 10+8=18/2=9
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano4}} - 10 Oldest: {{clkNano2}} - 6 " +
-				"Count: 3 Avg: 8", // 10 + 8 + 6 = 24 / 3 = 8
+				"Count: 3 Avg: 8", // 10+8+6=24/3=8
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano4}} - 10 Oldest: {{clkNano1}} - 4 " +
-				"Count: 4 Avg: 7", // 10 + 8 + 6 + 4 = 28 / 4 = 7
+				"Count: 4 Avg: 7", // 10+8+6+4=28/4=7
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano4}} - 10 Oldest: {{clkNano0}} - 2 " +
-				"Count: 5 Avg: 6", // 10 + 8 + 6 + 4 + 2 = 30 / 5 = 6
+				"Count: 5 Avg: 6", // 10+8+6+4+2=30/5=6
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano4}} - 10 Oldest: {{clkNano0}} - 2 " +
-				"Count: 5 Avg: 6", // 10 + 8 + 6 + 4 + 2 = 30 / 5 = 6
+				"Count: 5 Avg: 6", // 10+8+6+4+2=30/5=6
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano4}} - 10 Oldest: {{clkNano0}} - 2 " +
-				"Count: 5 Avg: 6", // 10 + 8 + 6 + 4 + 2 = 30 / 5 = 6
+				"Count: 5 Avg: 6", // 10+8+6+4+2=30/5=6
 		},
 	)
 
@@ -254,22 +254,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 6 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano5}} - 12 Oldest: {{clkNano4}} - 10 " +
-				"Count: 2 Avg: 11", // 12 + 10 = 22 / 2 = 11
+				"Count: 2 Avg: 11", // 12+10=22/2=11
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano5}} - 12 Oldest: {{clkNano3}} - 8 " +
-				"Count: 3 Avg: 10", // 12 + 10 + 8 = 30 / 3 = 10
+				"Count: 3 Avg: 10", // 12+10+8=30/3=10
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano5}} - 12 Oldest: {{clkNano2}} - 6 " +
-				"Count: 4 Avg: 9", // 12 + 10 + 8 + 6 = 36 / 4 = 9
+				"Count: 4 Avg: 9", // 12+10+8+6=36/4=9
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano5}} - 12 Oldest: {{clkNano1}} - 4 " +
-				"Count: 5 Avg: 8", // 12 + 10 + 8 + 6 + 4 = 40 / 5 = 8
+				"Count: 5 Avg: 8", // 12+10+8+6+4=40/5=8
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano5}} - 12 Oldest: {{clkNano0}} - 2 " +
-				"Count: 6 Avg: 7", // 12 + 10 + 8 + 6 + 4 + 2 = 42 / 6 = 7
+				"Count: 6 Avg: 7", // 12+10+8+6+4+2=42/6=7
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano5}} - 12 Oldest: {{clkNano0}} - 2 " +
-				"Count: 6 Avg: 7", // 12 + 10 + 8 + 6 + 4 + 2 = 42 / 6 = 7
+				"Count: 6 Avg: 7", // 12+10+8+6+4+2=42/6=7
 		},
 	)
 
@@ -281,22 +281,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 7 Cached: 0",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano6}} - 14 Oldest: {{clkNano5}} - 12 " +
-				"Count: 2 Avg: 13", // 14 + 12 = 26 / 2 = 13
+				"Count: 2 Avg: 13", // 14+12=26/2=13
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano6}} - 14 Oldest: {{clkNano4}} - 10 " +
-				"Count: 3 Avg: 12", // 14 + 12 + 10 = 36 / 3 = 12
+				"Count: 3 Avg: 12", // 14+12+10=36/3=12
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano6}} - 14 Oldest: {{clkNano3}} - 8 " +
-				"Count: 4 Avg: 11", // 14 + 12 + 10 + 8 = 44 / 4 = 11
+				"Count: 4 Avg: 11", // 14+12+10+8=44/4=11
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano6}} - 14 Oldest: {{clkNano2}} - 6 " +
-				"Count: 5 Avg: 10", // 14 + 12 + 10 + 8 + 6 = 50 / 5 = 10
+				"Count: 5 Avg: 10", // 14+12+10+8+6=50/5=10
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano6}} - 14 Oldest: {{clkNano1}} - 4 " +
-				"Count: 6 Avg: 9", // 14 + 12 + 10 + 8 + 6 + 4 = 54 / 6 = 9
+				"Count: 6 Avg: 9", // 14+12+10+8+6+4=54/6=9
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano6}} - 14 Oldest: {{clkNano0}} - 2 " +
-				"Count: 7 Avg: 8", // 14 + 12 + 10 + 8 + 6 + 4 + 2 = 56 / 7 = 8
+				"Count: 7 Avg: 8", // 14+12+10+8+6+4+2=56/7=8
 		},
 	)
 
@@ -308,22 +308,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 7 Cached: 1",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano7}} - 16 Oldest: {{clkNano6}} - 14 " +
-				"Count: 2 Avg: 15", // 16 + 14 = 30 / 2 = 15
+				"Count: 2 Avg: 15", // 16+14=30/2=15
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano7}} - 16 Oldest: {{clkNano5}} - 12 " +
-				"Count: 3 Avg: 14", // 16 + 14 + 12 = 42 / 3 = 14
+				"Count: 3 Avg: 14", // 16+14+12=42/3=14
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano7}} - 16 Oldest: {{clkNano4}} - 10 " +
-				"Count: 4 Avg: 13", // 16 + 14 + 12 + 10 = 52 / 4 = 13
+				"Count: 4 Avg: 13", // 16+14+12+10=52/4=13
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano7}} - 16 Oldest: {{clkNano3}} - 8 " +
-				"Count: 5 Avg: 12", // 16 + 14 + 12 + 10 + 8 = 60 / 5 = 12
+				"Count: 5 Avg: 12", // 16+14+12+10+8=60/5=12
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano7}} - 16 Oldest: {{clkNano2}} - 6 " +
-				"Count: 6 Avg: 11", // 16 + 14 + 12 + 10 + 8 + 6 = 66 / 6 = 10
+				"Count: 6 Avg: 11", // 16+14+12+10+8+6=66/6=10
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano7}} - 16 Oldest: {{clkNano1}} - 4 " +
-				"Count: 7 Avg: 10", // 16 + 14 + 12 + 10 + 8 + 6 + 4 = 70 / 7 = 10
+				"Count: 7 Avg: 10", // 16+14+12+10+8+6+4=70/7=10
 		},
 	)
 
@@ -335,22 +335,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 7 Cached: 1",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano7}} - 16 " +
-				"Count: 2 Avg: 17", // 18 + 16 = 34 / 2 = 17
+				"Count: 2 Avg: 17", // 18+16=34/2=17
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano6}} - 14 " +
-				"Count: 3 Avg: 16", // 18 + 16 + 14 = 48 / 3 = 16
+				"Count: 3 Avg: 16", // 18+16+14=48/3=16
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano5}} - 12 " +
-				"Count: 4 Avg: 15", // 18 + 16 + 14 + 12 = 60 / 4 = 15
+				"Count: 4 Avg: 15", // 18+16+14+12=60/4=15
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano4}} - 10 " +
-				"Count: 5 Avg: 14", // 18 + 16 + 14 + 12 + 10 = 70 / 5 = 12
+				"Count: 5 Avg: 14", // 18+16+14+12+10=70/5=12
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano3}} - 8 " +
-				"Count: 6 Avg: 13", // 18 + 16 + 14 + 12 + 10 + 8 = 78 / 6 = 13
+				"Count: 6 Avg: 13", // 18+16+14+12+10+8=78/6=13
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano2}} - 6 " +
-				"Count: 7 Avg: 12", // 18 + 16 + 14 + 12 + 10 + 8 + 6 = 84 / 7 = 12
+				"Count: 7 Avg: 12", // 18+16+14+12+10+8+6=84/7=12
 		},
 	)
 
@@ -363,22 +363,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 7 Cached: 1",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano7}} - 16 " +
-				"Count: 2 Avg: 17", // 18 + 16 = 34 / 2 = 17
+				"Count: 2 Avg: 17", // 18+16=34/2=17
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano6}} - 14 " +
-				"Count: 3 Avg: 16", // 18 + 16 + 14 = 48 / 3 = 16
+				"Count: 3 Avg: 16", // 18+16+14=48/3=16
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano5}} - 12 " +
-				"Count: 4 Avg: 15", // 18 + 16 + 14 + 12 = 60 / 4 = 15
+				"Count: 4 Avg: 15", // 18+16+14+12=60/4=15
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: <nil> Oldest: <nil> " +
 				"Count: 0 Avg: 0",
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano3}} - 8 " +
-				"Count: 6 Avg: 13", // 18 + 16 + 14 + 12 + 10 + 8 = 78 / 6 = 13
+				"Count: 6 Avg: 13", // 18+16+14+12+10+8=78/6=13
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano8}} - 18 Oldest: {{clkNano2}} - 6 " +
-				"Count: 7 Avg: 12", // 18 + 16 + 14 + 12 + 10 + 8 + 6 = 84 / 7 = 12
+				"Count: 7 Avg: 12", // 18+16+14+12+10+8+6=84/7=12
 		},
 	)
 
@@ -390,22 +390,22 @@ func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {
 				"Active: 7 Cached: 1",
 			"\t\tdatKey: datKey winKey: winKey1 Period: 1s " +
 				"Newest: {{clkNano9}} - 20 Oldest: {{clkNano8}} - 18 " +
-				"Count: 2 Avg: 19", // 20+ 18 = 38 / 2 = 19
+				"Count: 2 Avg: 19", // 20+ 18=38/2=19
 			"\t\tdatKey: datKey winKey: winKey2 Period: 2s " +
 				"Newest: {{clkNano9}} - 20 Oldest: {{clkNano7}} - 16 " +
-				"Count: 3 Avg: 18", // 20 + 18 + 16 + 14 = 54 / 3 = 18
+				"Count: 3 Avg: 18", // 20+18+16+14=54/3=18
 			"\t\tdatKey: datKey winKey: winKey3 Period: 3s " +
 				"Newest: {{clkNano9}} - 20 Oldest: {{clkNano6}} - 14 " +
-				"Count: 4 Avg: 17", // 20 + 18 + 16 + 14 + 12 = 68 / 4 = 17
+				"Count: 4 Avg: 17", // 20+18+16+14+12=68/4=17
 			"\t\tdatKey: datKey winKey: winKey4 Period: 4s " +
 				"Newest: {{clkNano9}} - 20 Oldest: {{clkNano9}} - 20 " +
-				"Count: 1 Avg: 20", // 20 = 20 / 1 = 20
+				"Count: 1 Avg: 20", // 20=20/1=20
 			"\t\tdatKey: datKey winKey: winKey5 Period: 5s " +
 				"Newest: {{clkNano9}} - 20 Oldest: {{clkNano4}} - 10 " +
-				"Count: 6 Avg: 15", // 20 + 18 + 16 + 14 + 12 + 10  = 90 / 6 = 15
+				"Count: 6 Avg: 15", // 20+18+16+14+12+10=90/6=15
 			"\t\tdatKey: datKey winKey: winKey6 Period: 6s " +
 				"Newest: {{clkNano9}} - 20 Oldest: {{clkNano3}} - 8 " +
-				"Count: 7 Avg: 14", // 20 + 18 + 16 + 14 + 12 + 10 + 8  = 98 / 7 = 14
+				"Count: 7 Avg: 14", // 20+18+16+14+12+10+8=98/7=14
 		},
 	)
 	winDB.delete()

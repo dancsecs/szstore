@@ -84,7 +84,9 @@ func TestThresholdData_NotifyFunction(t *testing.T) {
 		"datKey", "winKey",
 		5, 10, 15, 20,
 		func(k, w string, o, n ThresholdReason, v float64) {
-			log.Printf("Threshold for Key: %s Window: %s changed from: %-20s to: %-20s for value: %f",
+			log.Printf(
+				"Threshold for Key: %s Window: %s "+
+					"changed from: %-20s to: %-20s for value: %f",
 				k, w, o, n, v,
 			)
 		},
@@ -103,6 +105,7 @@ func TestThresholdData_NotifyFunction(t *testing.T) {
 	chk.AddSub(`4\.000000`, "3.000000")
 	chk.AddSub(`2\.000000`, "3.000000")
 	chk.AddSub(`1\.000000`, "3.000000")
+	//nolint: lll // Ok.
 	chk.Log(
 		"Threshold for Key: datKey Window: winKey changed from: Unknown              to: Low Critical         for value: 0.000000",
 		"Threshold for Key: datKey Window: winKey changed from: Low Critical         to: Low Warning          for value: 6.000000",

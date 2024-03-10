@@ -71,15 +71,17 @@ func validateHistory(
 		vSlice []string
 	)
 
-	fStore.getHistoryDays(datKey, days, func(a Action, ts time.Time, raw string) {
-		if a == ActionDelete {
-			tSlice = nil
-			vSlice = nil
-		} else {
-			tSlice = append(tSlice, ts.Format(fmtTimeStamp))
-			vSlice = append(vSlice, raw)
-		}
-	})
+	fStore.getHistoryDays(datKey, days,
+		func(a Action, ts time.Time, raw string) {
+			if a == ActionDelete {
+				tSlice = nil
+				vSlice = nil
+			} else {
+				tSlice = append(tSlice, ts.Format(fmtTimeStamp))
+				vSlice = append(vSlice, raw)
+			}
+		},
+	)
 	chk.StrSlice(tSlice, expTSlice)
 	chk.StrSlice(vSlice, expVSlice)
 }
@@ -132,7 +134,10 @@ func TestWStoreBase_EmptyDirectory(t *testing.T) {
 		"",
 	)
 
-	fPath := filepath.Join(dirName, filename) + "_" + chk.ClockLastFmtDate() + fileExtension
+	fPath := filepath.Join(dirName, filename) +
+		"_" +
+		chk.ClockLastFmtDate() +
+		fileExtension
 	chk.Log(
 		`opening file based szStore {{file}} in directory {{dir}}`,
 		`starting path generated as: `+fPath,
@@ -152,6 +157,7 @@ func TestWStoreBase_OpenInvalidRecordParsing(t *testing.T) {
 		time.Second,
 	)
 
+	//nolint:lll // Ok.
 	chk.NoErr(
 		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0         */ "", "|U|key1|First"},

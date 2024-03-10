@@ -170,12 +170,12 @@ func Test_WStoreString_UseCase(t *testing.T) {
 	chk.NoErr(stringStore.Open())
 	defer closeAndLogIfError(stringStore)
 
-	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano2
+	validateStringHistory(chk, stringStore, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]string{},
 	)
 
-	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano2
+	validateStringHistory(chk, stringStore, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]string{},
 	)
@@ -183,12 +183,12 @@ func Test_WStoreString_UseCase(t *testing.T) {
 	chk.NoErr(stringStore.Update("key1", "key1BeforeDelete")) // clkNano4
 	chk.NoErr(stringStore.Update("key2", "key2BeforeDelete")) // clkNano5
 
-	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano6
+	validateStringHistory(chk, stringStore, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]string{"key1BeforeDelete"},
 	)
 
-	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano7
+	validateStringHistory(chk, stringStore, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]string{"key2BeforeDelete"},
 	)
@@ -196,12 +196,12 @@ func Test_WStoreString_UseCase(t *testing.T) {
 	chk.NoErr(stringStore.Delete("key1")) // clkNano8
 	chk.NoErr(stringStore.Delete("key2")) // clkNano9
 
-	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano10
+	validateStringHistory(chk, stringStore, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]string{},
 	)
 
-	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano11
+	validateStringHistory(chk, stringStore, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]string{},
 	)
@@ -209,12 +209,12 @@ func Test_WStoreString_UseCase(t *testing.T) {
 	chk.NoErr(stringStore.Update("key1", "key1AfterDelete")) // clkNano12
 	chk.NoErr(stringStore.Update("key2", "key2AfterDelete")) // clkNano13
 
-	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano14
+	validateStringHistory(chk, stringStore, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]string{"key1AfterDelete"},
 	)
 
-	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano15
+	validateStringHistory(chk, stringStore, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]string{"key2AfterDelete"},
 	)

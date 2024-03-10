@@ -99,12 +99,12 @@ func Test_WStoreFloat64_UseCase(t *testing.T) {
 	chk.NoErr(float64Store.Open())
 	defer closeAndLogIfError(float64Store)
 
-	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano2
+	validateFloat64History(chk, float64Store, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]float64{},
 	)
 
-	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano2
+	validateFloat64History(chk, float64Store, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]float64{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreFloat64_UseCase(t *testing.T) {
 	chk.NoErr(float64Store.Update("key1", 200.0))  // clkNano4
 	chk.NoErr(float64Store.Update("key2", -200.0)) // clkNano5
 
-	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano6
+	validateFloat64History(chk, float64Store, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]float64{200.0},
 	)
 
-	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano7
+	validateFloat64History(chk, float64Store, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]float64{-200.0},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreFloat64_UseCase(t *testing.T) {
 	chk.NoErr(float64Store.Delete("key1")) // clkNano8
 	chk.NoErr(float64Store.Delete("key2")) // clkNano9
 
-	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano10
+	validateFloat64History(chk, float64Store, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]float64{},
 	)
 
-	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano11
+	validateFloat64History(chk, float64Store, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]float64{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreFloat64_UseCase(t *testing.T) {
 	chk.NoErr(float64Store.Update("key1", 222.0))  // clkNano12
 	chk.NoErr(float64Store.Update("key2", -222.0)) // clkNano13
 
-	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano14
+	validateFloat64History(chk, float64Store, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]float64{222.0},
 	)
 
-	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano15
+	validateFloat64History(chk, float64Store, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]float64{-222.0},
 	)

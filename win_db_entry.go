@@ -168,11 +168,12 @@ func (w *window) getCount() (uint64, error) {
 
 // String returns a string representation of a window structure.
 func (w *window) String() string {
-	a, _ := w.getAvg()
-	c, _ := w.getCount()
+	average, _ := w.getAvg()
+	count, _ := w.getCount()
 
 	return fmt.Sprintf(
-		"datKey: %s winKey: %s Period: %v Newest: %v Oldest: %v Count: %d Avg: %g",
-		w.datKey, w.winKey, w.period, w.newest, w.oldest, c, a,
+		"datKey: %s winKey: %s Period: "+
+			"%v Newest: %v Oldest: %v Count: %d Avg: %g",
+		w.datKey, w.winKey, w.period, w.newest, w.oldest, count, average,
 	)
 }

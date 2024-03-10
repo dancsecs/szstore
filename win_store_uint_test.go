@@ -99,12 +99,12 @@ func Test_WStoreUint_UseCase(t *testing.T) {
 	chk.NoErr(uintStore.Open())
 	defer closeAndLogIfError(uintStore)
 
-	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano2
+	validateUintHistory(chk, uintStore, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]uint{},
 	)
 
-	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano2
+	validateUintHistory(chk, uintStore, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]uint{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreUint_UseCase(t *testing.T) {
 	chk.NoErr(uintStore.Update("key1", 200)) // clkNano4
 	chk.NoErr(uintStore.Update("key2", 400)) // clkNano5
 
-	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano6
+	validateUintHistory(chk, uintStore, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint{200},
 	)
 
-	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano7
+	validateUintHistory(chk, uintStore, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint{400},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreUint_UseCase(t *testing.T) {
 	chk.NoErr(uintStore.Delete("key1")) // clkNano8
 	chk.NoErr(uintStore.Delete("key2")) // clkNano9
 
-	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano10
+	validateUintHistory(chk, uintStore, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]uint{},
 	)
 
-	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano11
+	validateUintHistory(chk, uintStore, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]uint{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreUint_UseCase(t *testing.T) {
 	chk.NoErr(uintStore.Update("key1", 222)) // clkNano12
 	chk.NoErr(uintStore.Update("key2", 444)) // clkNano13
 
-	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano14
+	validateUintHistory(chk, uintStore, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint{222},
 	)
 
-	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano15
+	validateUintHistory(chk, uintStore, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint{444},
 	)

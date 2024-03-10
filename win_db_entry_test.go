@@ -65,14 +65,17 @@ func TestWindowEntry_Logging(t *testing.T) {
 		if first == nil {
 			log.Print(line + " FIRST: <nil>")
 		} else {
-			log.Print(line + " FIRST: {" + first.timestamp.Format(fmtTimeStamp) + "," +
-				strconv.FormatFloat(first.value, 'g', -1, 64) + "}")
+			log.Print(
+				line +
+					" FIRST: {" + first.timestamp.Format(fmtTimeStamp) + "," +
+					strconv.FormatFloat(first.value, 'g', -1, 64) + "}")
 		}
 
 		if last == nil {
 			log.Print(line + "  LAST: <nil>")
 		} else {
-			log.Print(line + "  LAST: {" + last.timestamp.Format(fmtTimeStamp) + "," +
+			log.Print(line +
+				"  LAST: {" + last.timestamp.Format(fmtTimeStamp) + "," +
 				strconv.FormatFloat(last.value, 'g', -1, 64) + "}")
 		}
 	}

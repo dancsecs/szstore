@@ -20,8 +20,6 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-    - lll
-
     - deadcode # Deprecated
     - exhaustivestruct # Deprecated
     - golint # Deprecated
@@ -47,7 +45,6 @@ issues:
     - path: _test\.go  # Exclude on test files.
       linters:
         - goconst
-        - lll
         - paralleltest
         - testpackage
 

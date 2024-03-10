@@ -99,12 +99,12 @@ func Test_WStoreUint16_UseCase(t *testing.T) {
 	chk.NoErr(uint16Store.Open())
 	defer closeAndLogIfError(uint16Store)
 
-	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano2
+	validateUint16History(chk, uint16Store, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]uint16{},
 	)
 
-	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano2
+	validateUint16History(chk, uint16Store, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]uint16{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreUint16_UseCase(t *testing.T) {
 	chk.NoErr(uint16Store.Update("key1", 200)) // clkNano4
 	chk.NoErr(uint16Store.Update("key2", 400)) // clkNano5
 
-	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano6
+	validateUint16History(chk, uint16Store, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint16{200},
 	)
 
-	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano7
+	validateUint16History(chk, uint16Store, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint16{400},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreUint16_UseCase(t *testing.T) {
 	chk.NoErr(uint16Store.Delete("key1")) // clkNano8
 	chk.NoErr(uint16Store.Delete("key2")) // clkNano9
 
-	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano10
+	validateUint16History(chk, uint16Store, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]uint16{},
 	)
 
-	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano11
+	validateUint16History(chk, uint16Store, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]uint16{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreUint16_UseCase(t *testing.T) {
 	chk.NoErr(uint16Store.Update("key1", 222)) // clkNano12
 	chk.NoErr(uint16Store.Update("key2", 444)) // clkNano13
 
-	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano14
+	validateUint16History(chk, uint16Store, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint16{222},
 	)
 
-	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano15
+	validateUint16History(chk, uint16Store, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint16{444},
 	)

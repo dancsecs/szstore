@@ -99,12 +99,12 @@ func Test_WStoreInt8_UseCase(t *testing.T) {
 	chk.NoErr(int8Store.Open())
 	defer closeAndLogIfError(int8Store)
 
-	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano2
+	validateInt8History(chk, int8Store, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]int8{},
 	)
 
-	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano2
+	validateInt8History(chk, int8Store, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]int8{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreInt8_UseCase(t *testing.T) {
 	chk.NoErr(int8Store.Update("key1", 20))  // clkNano4
 	chk.NoErr(int8Store.Update("key2", -20)) // clkNano5
 
-	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano6
+	validateInt8History(chk, int8Store, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]int8{20},
 	)
 
-	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano7
+	validateInt8History(chk, int8Store, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]int8{-20},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreInt8_UseCase(t *testing.T) {
 	chk.NoErr(int8Store.Delete("key1")) // clkNano8
 	chk.NoErr(int8Store.Delete("key2")) // clkNano9
 
-	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano10
+	validateInt8History(chk, int8Store, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]int8{},
 	)
 
-	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano11
+	validateInt8History(chk, int8Store, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]int8{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreInt8_UseCase(t *testing.T) {
 	chk.NoErr(int8Store.Update("key1", 22))  // clkNano12
 	chk.NoErr(int8Store.Update("key2", -22)) // clkNano13
 
-	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano14
+	validateInt8History(chk, int8Store, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]int8{22},
 	)
 
-	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano15
+	validateInt8History(chk, int8Store, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]int8{-22},
 	)

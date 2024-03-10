@@ -104,7 +104,9 @@ func (fs *fileStore) Open() error {
 	defer fs.rwMutex.Unlock()
 
 	log.Printf(
-		"opening file based szStore %s in directory %s", fs.filenameRoot, fs.dirName,
+		"opening file based szStore %s in directory %s",
+		fs.filenameRoot,
+		fs.dirName,
 	)
 
 	var startingFilePath string
@@ -272,16 +274,23 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 		)
 	}
 
-	if !strings.HasPrefix(fields[0], filePath[len(filePath)-12:len(filePath)-4]) {
+	if !strings.HasPrefix(
+		fields[0], filePath[len(filePath)-12:len(filePath)-4],
+	) {
 		return timestamp, action, key, value, fs.logMsg(
 			proc + "invalid date mismatch: \"" + fields[0][:8] + `"`,
 		)
 	}
 
 	if len(fields[2]) < minKeyLength {
-		return timestamp, action, key, value, fs.logMsg(
-			proc + "invalid key length (>= 2 characters): \"" + fields[2] + `"`,
-		)
+		return timestamp, action, key, value,
+			fs.logMsg(
+				proc +
+					"invalid key length (>= 2 characters): " +
+					`"` +
+					fields[2] +
+					`"`,
+			)
 	}
 
 	key = fields[2]
@@ -412,13 +421,16 @@ func (fs *fileStore) addAll(
 		for scanner.Scan() {
 			fs.fLine = scanner.Text()
 			fs.fLineNum++
-			timestamp, action, id, value, ok := fs.splitRecord(fPath, scanner.Text())
+			timestamp, action, id, value, ok := fs.splitRecord(
+				fPath, scanner.Text(),
+			)
 
 			if ok && id == idWanted {
 				if lastTS.After(timestamp) {
 					fs.logMsg(
-						fmt.Sprintf("addAll: invalid timestamp out of sequence:"+
-							" received date: %s last date: %s",
+						fmt.Sprintf(
+							"addAll: invalid timestamp out of sequence:"+
+								" received date: %s last date: %s",
 							timestamp.Format(fmtTimeStamp),
 							lastTS.Format(fmtTimeStamp),
 						),
@@ -435,7 +447,9 @@ func (fs *fileStore) addAll(
 
 	if err != nil {
 		fs.logMsg(
-			fmt.Sprintf("addAll(fName=%q,isWanted=%q): %v", fName, idWanted, err),
+			fmt.Sprintf(
+				"addAll(fName=%q,isWanted=%q): %v", fName, idWanted, err,
+			),
 		)
 	}
 }

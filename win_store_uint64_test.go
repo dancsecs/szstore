@@ -99,12 +99,12 @@ func Test_WStoreUint64_UseCase(t *testing.T) {
 	chk.NoErr(uint64Store.Open())
 	defer closeAndLogIfError(uint64Store)
 
-	validateUint64History(chk, uint64Store, "key1", 0, // advances to clkNano2
+	validateUint64History(chk, uint64Store, "key1", 0, // next clk:clkNano2
 		[]string{},
 		[]uint64{},
 	)
 
-	validateUint64History(chk, uint64Store, "key2", 0, // advances to clkNano2
+	validateUint64History(chk, uint64Store, "key2", 0, // next clk:clkNano2
 		[]string{},
 		[]uint64{},
 	)
@@ -112,12 +112,12 @@ func Test_WStoreUint64_UseCase(t *testing.T) {
 	chk.NoErr(uint64Store.Update("key1", 200)) // clkNano4
 	chk.NoErr(uint64Store.Update("key2", 400)) // clkNano5
 
-	validateUint64History(chk, uint64Store, "key1", 0, // advances to clkNano6
+	validateUint64History(chk, uint64Store, "key1", 0, // next clk:clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint64{200},
 	)
 
-	validateUint64History(chk, uint64Store, "key2", 0, // advances to clkNano7
+	validateUint64History(chk, uint64Store, "key2", 0, // next clk:clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint64{400},
 	)
@@ -125,12 +125,12 @@ func Test_WStoreUint64_UseCase(t *testing.T) {
 	chk.NoErr(uint64Store.Delete("key1")) // clkNano8
 	chk.NoErr(uint64Store.Delete("key2")) // clkNano9
 
-	validateUint64History(chk, uint64Store, "key1", 0, // advances to clkNano10
+	validateUint64History(chk, uint64Store, "key1", 0, // next clk:clkNano10
 		[]string{},
 		[]uint64{},
 	)
 
-	validateUint64History(chk, uint64Store, "key2", 0, // advances to clkNano11
+	validateUint64History(chk, uint64Store, "key2", 0, // next clk:clkNano11
 		[]string{},
 		[]uint64{},
 	)
@@ -138,12 +138,12 @@ func Test_WStoreUint64_UseCase(t *testing.T) {
 	chk.NoErr(uint64Store.Update("key1", 222)) // clkNano12
 	chk.NoErr(uint64Store.Update("key2", 444)) // clkNano13
 
-	validateUint64History(chk, uint64Store, "key1", 0, // advances to clkNano14
+	validateUint64History(chk, uint64Store, "key1", 0, // next clk:clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint64{222},
 	)
 
-	validateUint64History(chk, uint64Store, "key2", 0, // advances to clkNano15
+	validateUint64History(chk, uint64Store, "key2", 0, // next clk:clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint64{444},
 	)
