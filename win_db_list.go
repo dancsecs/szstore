@@ -48,17 +48,17 @@ func newWinDB(datKey string) *winDB {
 
 // addWindow includes a new time period to account all entries for.
 func (wdb *winDB) addWindow(
-	winKey string, p time.Duration,
+	winKey string, timePeriod time.Duration,
 ) error {
 	if _, ok := wdb.windows[winKey]; ok {
 		return ErrDupWinKey
 	}
 
-	newWin := newWindow(wdb.datKey, winKey, p)
+	newWin := newWindow(wdb.datKey, winKey, timePeriod)
 
 	wdb.windows[winKey] = newWin
-	if p > wdb.maxPeriod {
-		wdb.maxPeriod = p
+	if timePeriod > wdb.maxPeriod {
+		wdb.maxPeriod = timePeriod
 	}
 
 	wdb.winKeys = append(wdb.winKeys, winKey)
@@ -68,13 +68,13 @@ func (wdb *winDB) addWindow(
 }
 
 // addValue incorporates a new value into the underlying store.
-func (wdb *winDB) addValue(t time.Time, f float64) {
+func (wdb *winDB) addValue(timestamp time.Time, value float64) {
 	e := wdb.cachedEntry
 	if e != nil {
 		wdb.cachedEntry = e.next
 	}
 
-	wdb.newestEntry = wdb.newestEntry.newHead(e, t, f)
+	wdb.newestEntry = wdb.newestEntry.newHead(e, timestamp, value)
 
 	if wdb.oldestEntry == nil {
 		wdb.oldestEntry = wdb.newestEntry
@@ -123,9 +123,9 @@ func (wdb *winDB) delete() {
 }
 
 func (wdb *winDB) trim() {
-	nt := wdb.newestEntry.t
+	nt := wdb.newestEntry.timestamp
 	for wdb.oldestEntry.prev != nil &&
-		nt.Sub(wdb.oldestEntry.t) > wdb.maxPeriod {
+		nt.Sub(wdb.oldestEntry.timestamp) > wdb.maxPeriod {
 		//	log.Printf("Removing oldest")
 		e := wdb.oldestEntry
 		wdb.oldestEntry = e.prev
@@ -138,7 +138,7 @@ func (wdb *winDB) trim() {
 
 func (wdb *winDB) addThreshold(winKey string,
 	lowCritical, lowWarning, highWarning, highCritical float64,
-	f ThresholdCallbackFunc,
+	notifyFunc ThresholdNotifyFunc,
 ) error {
 	dw, ok := wdb.windows[winKey]
 	if !ok {
@@ -146,36 +146,36 @@ func (wdb *winDB) addThreshold(winKey string,
 	}
 
 	return dw.addThreshold(
-		lowCritical, lowWarning, highWarning, highCritical, f,
+		lowCritical, lowWarning, highWarning, highCritical, notifyFunc,
 	)
 }
 
 func (wdb *winDB) count() int {
-	n := 0
-	e := wdb.newestEntry
+	numEntries := 0
+	entry := wdb.newestEntry
 
-	for e != nil {
-		n++
-		e = e.next
+	for entry != nil {
+		numEntries++
+		entry = entry.next
 	}
 
-	return n
+	return numEntries
 }
 
 func (wdb *winDB) cachedCount() int {
-	n := 0
-	e := wdb.cachedEntry
+	numEntries := 0
+	entry := wdb.cachedEntry
 
-	for e != nil {
-		n++
-		e = e.next
+	for entry != nil {
+		numEntries++
+		entry = entry.next
 	}
 
-	return n
+	return numEntries
 }
 
 func (wdb *winDB) String() string {
-	r := "" +
+	result := "" +
 		"winDB: datKey: " + wdb.datKey +
 		" maxPeriod: " + fmt.Sprintf("%v", wdb.maxPeriod) +
 		fmt.Sprintf(
@@ -184,8 +184,8 @@ func (wdb *winDB) String() string {
 		)
 
 	for _, w := range wdb.winKeys {
-		r += "\n\t\t" + wdb.windows[w].String()
+		result += "\n\t\t" + wdb.windows[w].String()
 	}
 
-	return r
+	return result
 }

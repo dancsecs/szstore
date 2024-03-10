@@ -31,9 +31,9 @@ func TestWindowEntry_String(t *testing.T) {
 	chk := sztest.CaptureNothing(t)
 	defer chk.Release()
 
-	var e *windowEntry
+	var entry *windowEntry
 
-	chk.Strf(e.String(), "<nil>", "unexpected return from %v", e)
+	chk.Strf(entry.String(), "<nil>", "unexpected return from %v", entry)
 
 	chk.ClockSet(
 		time.Date(2020, time.January, 1, 2, 3, 4, 500000000, time.Local),
@@ -41,8 +41,8 @@ func TestWindowEntry_String(t *testing.T) {
 	)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	e = e.newHead(nil, chk.ClockNext(), 123.456)
-	chk.Str(e.String(), "{{clkNano0}} - 123.456")
+	entry = entry.newHead(nil, chk.ClockNext(), 123.456)
+	chk.Str(entry.String(), "{{clkNano0}} - 123.456")
 }
 
 func TestWindowEntry_Logging(t *testing.T) {
@@ -60,19 +60,19 @@ func TestWindowEntry_Logging(t *testing.T) {
 
 		return ts
 	}
-	log := func(l string) {
+	log := func(line string) {
 		if first == nil {
-			log.Print(l + " FIRST: <nil>")
+			log.Print(line + " FIRST: <nil>")
 		} else {
-			log.Print(l + " FIRST: {" + first.t.Format(fmtTimeStamp) + "," +
-				strconv.FormatFloat(first.f, 'g', -1, 64) + "}")
+			log.Print(line + " FIRST: {" + first.timestamp.Format(fmtTimeStamp) + "," +
+				strconv.FormatFloat(first.value, 'g', -1, 64) + "}")
 		}
 
 		if last == nil {
-			log.Print(l + "  LAST: <nil>")
+			log.Print(line + "  LAST: <nil>")
 		} else {
-			log.Print(l + "  LAST: {" + last.t.Format(fmtTimeStamp) + "," +
-				strconv.FormatFloat(last.f, 'g', -1, 64) + "}")
+			log.Print(line + "  LAST: {" + last.timestamp.Format(fmtTimeStamp) + "," +
+				strconv.FormatFloat(last.value, 'g', -1, 64) + "}")
 		}
 	}
 	log("Uninitialized")
@@ -177,15 +177,15 @@ func TestWindowWindow_TrimFromEmpty(t *testing.T) {
 
 	newWindow := newWindow("datKey1", "winKey1", time.Second*5)
 
-	c, err := newWindow.getCount()
+	count, err := newWindow.getCount()
 	chk.Err(err, ErrNoWinData.Error())
-	chk.Uint64(c, 0)
+	chk.Uint64(count, 0)
 
 	newWindow.trim()
 
-	c, err = newWindow.getCount()
+	count, err = newWindow.getCount()
 	chk.Err(err, ErrNoWinData.Error())
-	chk.Uint64(c, 0)
+	chk.Uint64(count, 0)
 }
 
 func TestWindowWindow_TrimWithOneElement(t *testing.T) {
@@ -258,13 +258,13 @@ func TestWindowWindow_AddThreeNoTrim(t *testing.T) {
 
 	newWindow := newWindow("datKey1", "winKey1", time.Second*5)
 
-	var e *windowEntry
-	e = e.newHead(nil, chk.ClockNext(), 2)
-	newWindow.add(e)
-	e = e.newHead(nil, chk.ClockNext(), 4)
-	newWindow.add(e)
-	e = e.newHead(nil, chk.ClockNext(), 6)
-	newWindow.add(e)
+	var entry *windowEntry
+	entry = entry.newHead(nil, chk.ClockNext(), 2)
+	newWindow.add(entry)
+	entry = entry.newHead(nil, chk.ClockNext(), 4)
+	newWindow.add(entry)
+	entry = entry.newHead(nil, chk.ClockNext(), 6)
+	newWindow.add(entry)
 
 	chk.Str(newWindow.String(),
 		"datKey: datKey1 winKey: winKey1 Period: 5s "+
@@ -285,13 +285,13 @@ func TestWindowWindow_AddThreeWithTrim(t *testing.T) {
 
 	newWindow := newWindow("datKey1", "winKey1", time.Second*1)
 
-	var e *windowEntry
-	e = e.newHead(nil, chk.ClockNext(), 2)
-	newWindow.add(e)
-	e = e.newHead(nil, chk.ClockNext(), 4)
-	newWindow.add(e)
-	e = e.newHead(nil, chk.ClockNext(), 6)
-	newWindow.add(e)
+	var entry *windowEntry
+	entry = entry.newHead(nil, chk.ClockNext(), 2)
+	newWindow.add(entry)
+	entry = entry.newHead(nil, chk.ClockNext(), 4)
+	newWindow.add(entry)
+	entry = entry.newHead(nil, chk.ClockNext(), 6)
+	newWindow.add(entry)
 
 	chk.Str(newWindow.String(),
 		"datKey: datKey1 winKey: winKey1 Period: 1s "+
@@ -312,13 +312,13 @@ func TestWindowWindow_AddThreeThenDelete(t *testing.T) {
 
 	newWindow := newWindow("datKey1", "winKey1", time.Second*5)
 
-	var e *windowEntry
-	e = e.newHead(nil, chk.ClockNext(), 2)
-	newWindow.add(e)
-	e = e.newHead(nil, chk.ClockNext(), 4)
-	newWindow.add(e)
-	e = e.newHead(nil, chk.ClockNext(), 6)
-	newWindow.add(e)
+	var entry *windowEntry
+	entry = entry.newHead(nil, chk.ClockNext(), 2)
+	newWindow.add(entry)
+	entry = entry.newHead(nil, chk.ClockNext(), 4)
+	newWindow.add(entry)
+	entry = entry.newHead(nil, chk.ClockNext(), 6)
+	newWindow.add(entry)
 
 	chk.Str(newWindow.String(),
 		"datKey: datKey1 winKey: winKey1 Period: 5s "+
@@ -346,12 +346,12 @@ func TestWindowWindow_TestThresholds(t *testing.T) {
 	)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	w := newWindow("D", "W1", time.Second*5)
+	window := newWindow("D", "W1", time.Second*5)
 
 	callbackTriggered := false
 
 	chk.NoErr(
-		w.addThreshold(1, 3, 5, 7, func(datKey, winKey string,
+		window.addThreshold(1, 3, 5, 7, func(datKey, winKey string,
 			f, t ThresholdReason,
 			avg float64,
 		) {
@@ -359,11 +359,11 @@ func TestWindowWindow_TestThresholds(t *testing.T) {
 		}),
 	)
 
-	w.add(&windowEntry{
-		t:    chk.ClockNext(),
-		f:    100.0,
-		next: nil,
-		prev: nil,
+	window.add(&windowEntry{
+		timestamp: chk.ClockNext(),
+		value:     100.0,
+		next:      nil,
+		prev:      nil,
 	})
 
 	chk.True(callbackTriggered)

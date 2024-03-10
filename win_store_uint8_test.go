@@ -34,22 +34,22 @@ func setupWStoreUint8WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewUint8(dir, fName)
-	s.ts = chk.ClockNext
+	uint8Store := NewUint8(dirName, filename)
+	uint8Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, uint8Store
 }
 
 func validateUint8History(
 	chk *sztest.Chk,
-	s *WStoreUint8,
+	uint8Store *WStoreUint8,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateUint8History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := uint8Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Uint8(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Uint8(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := uint8Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateUint8History(
 func Test_WStoreUint8_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreUint8WithClock(
+
+	dirName, filename, uint8Store := setupWStoreUint8WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|256"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(uint8Store.Open())
+	defer closeAndLogIfError(uint8Store)
 
-	validateUint8History(chk, s, "key1", 0, // advances to clkNano2
+	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]uint8{},
 	)
 
-	validateUint8History(chk, s, "key2", 0, // advances to clkNano2
+	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]uint8{},
 	)
 
-	chk.NoErr(s.Update("key1", 20)) // clkNano4
-	chk.NoErr(s.Update("key2", 40)) // clkNano5
+	chk.NoErr(uint8Store.Update("key1", 20)) // clkNano4
+	chk.NoErr(uint8Store.Update("key2", 40)) // clkNano5
 
-	validateUint8History(chk, s, "key1", 0, // advances to clkNano6
+	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint8{20},
 	)
 
-	validateUint8History(chk, s, "key2", 0, // advances to clkNano7
+	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint8{40},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(uint8Store.Delete("key1")) // clkNano8
+	chk.NoErr(uint8Store.Delete("key2")) // clkNano9
 
-	validateUint8History(chk, s, "key1", 0, // advances to clkNano10
+	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]uint8{},
 	)
 
-	validateUint8History(chk, s, "key2", 0, // advances to clkNano11
+	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]uint8{},
 	)
 
-	chk.NoErr(s.Update("key1", 22)) // clkNano12
-	chk.NoErr(s.Update("key2", 44)) // clkNano13
+	chk.NoErr(uint8Store.Update("key1", 22)) // clkNano12
+	chk.NoErr(uint8Store.Update("key2", 44)) // clkNano13
 
-	validateUint8History(chk, s, "key1", 0, // advances to clkNano14
+	validateUint8History(chk, uint8Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint8{22},
 	)
 
-	validateUint8History(chk, s, "key2", 0, // advances to clkNano15
+	validateUint8History(chk, uint8Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint8{44},
 	)

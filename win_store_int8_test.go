@@ -34,22 +34,22 @@ func setupWStoreInt8WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewInt8(dir, fName)
-	s.ts = chk.ClockNext
+	int8Store := NewInt8(dirName, filename)
+	int8Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, int8Store
 }
 
 func validateInt8History(
 	chk *sztest.Chk,
-	s *WStoreInt8,
+	int8Store *WStoreInt8,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateInt8History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := int8Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Int8(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Int8(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := int8Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateInt8History(
 func Test_WStoreInt8_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreInt8WithClock(
+
+	dirName, filename, int8Store := setupWStoreInt8WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|128"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(int8Store.Open())
+	defer closeAndLogIfError(int8Store)
 
-	validateInt8History(chk, s, "key1", 0, // advances to clkNano2
+	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]int8{},
 	)
 
-	validateInt8History(chk, s, "key2", 0, // advances to clkNano2
+	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]int8{},
 	)
 
-	chk.NoErr(s.Update("key1", 20))  // clkNano4
-	chk.NoErr(s.Update("key2", -20)) // clkNano5
+	chk.NoErr(int8Store.Update("key1", 20))  // clkNano4
+	chk.NoErr(int8Store.Update("key2", -20)) // clkNano5
 
-	validateInt8History(chk, s, "key1", 0, // advances to clkNano6
+	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]int8{20},
 	)
 
-	validateInt8History(chk, s, "key2", 0, // advances to clkNano7
+	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]int8{-20},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(int8Store.Delete("key1")) // clkNano8
+	chk.NoErr(int8Store.Delete("key2")) // clkNano9
 
-	validateInt8History(chk, s, "key1", 0, // advances to clkNano10
+	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]int8{},
 	)
 
-	validateInt8History(chk, s, "key2", 0, // advances to clkNano11
+	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]int8{},
 	)
 
-	chk.NoErr(s.Update("key1", 22))  // clkNano12
-	chk.NoErr(s.Update("key2", -22)) // clkNano13
+	chk.NoErr(int8Store.Update("key1", 22))  // clkNano12
+	chk.NoErr(int8Store.Update("key2", -22)) // clkNano13
 
-	validateInt8History(chk, s, "key1", 0, // advances to clkNano14
+	validateInt8History(chk, int8Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]int8{22},
 	)
 
-	validateInt8History(chk, s, "key2", 0, // advances to clkNano15
+	validateInt8History(chk, int8Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]int8{-22},
 	)

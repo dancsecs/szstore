@@ -38,30 +38,30 @@ func setupWStoreBaseWithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	s := newFileStore(dir, fName)
+	fStore := newFileStore(dirName, filename)
 	// Use test clock for predictable timestamps.
-	s.ts = chk.ClockNext
+	fStore.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, fStore
 }
 
 func validateHistory(
 	chk *sztest.Chk,
-	s *fileStore,
+	fStore *fileStore,
 	datKey string,
 	days uint,
 	expTSlice, expVSlice []string,
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.get(datKey)
+	ts, v, ok := fStore.get(datKey)
 	chk.True(ok)
 	chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
 	chk.Str(v, expVSlice[len(expVSlice)-1])
@@ -71,7 +71,7 @@ func validateHistory(
 		vSlice []string
 	)
 
-	s.getHistoryDays(datKey, days, func(a Action, ts time.Time, raw string) {
+	fStore.getHistoryDays(datKey, days, func(a Action, ts time.Time, raw string) {
 		if a == ActionDelete {
 			tSlice = nil
 			vSlice = nil
@@ -84,18 +84,18 @@ func validateHistory(
 	chk.StrSlice(vSlice, expVSlice)
 }
 
-func countFiles(d, f string) int {
-	entries, err := os.ReadDir(d)
+func countFiles(dirName, filenameRoot string) int {
+	entries, err := os.ReadDir(dirName)
 	if err == nil {
-		c := 0
+		count := 0
 
 		for _, e := range entries {
-			if strings.HasPrefix(e.Name(), f) {
-				c++
+			if strings.HasPrefix(e.Name(), filenameRoot) {
+				count++
 			}
 		}
 
-		return c
+		return count
 	}
 
 	return -1
@@ -121,18 +121,18 @@ func TestWStoreBase_EmptyDirectory(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.Err(
-		s.Open(),
+		fStore.Open(),
 		"",
 	)
 
-	fPath := filepath.Join(d, f) + "_" + chk.ClockLastFmtDate() + fileExtension
+	fPath := filepath.Join(dirName, filename) + "_" + chk.ClockLastFmtDate() + fileExtension
 	chk.Log(
 		`opening file based szStore {{file}} in directory {{dir}}`,
 		`starting path generated as: `+fPath,
@@ -144,14 +144,14 @@ func TestWStoreBase_OpenInvalidRecordParsing(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, d, f, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0         */ "", "|U|key1|First"},
 			{ /* clkNano1         */ "", "|U|Bad"},       // Missing field.
 			{ /* clkNano2         */ "", "||key1|Bad"},   // Missing action.
@@ -169,10 +169,10 @@ func TestWStoreBase_OpenInvalidRecordParsing(t *testing.T) {
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	validateHistory(chk, s, "key1", 2,
+	validateHistory(chk, fStore, "key1", 2,
 		[]string{"{{clkNano0}}", "{{clkNano7}}"},
 		[]string{"First", "Final"},
 	)
@@ -256,25 +256,25 @@ func TestFile_LoadHistoryInvalidFileClose(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, d, f, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{"", "|U|key1|10"},
 			{"", "|U|key1|20"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	chk.NoErr(s.currentFile.Close())
+	chk.NoErr(fStore.currentFile.Close())
 
-	chk.NoErr(s.Close())
+	chk.NoErr(fStore.Close())
 
 	chk.Log(`
 		opening file based szStore {{file}} in directory {{dir}}
@@ -287,15 +287,15 @@ func TestWStoreBase_LoadHistoryInvalidFile(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, _, s := setupWStoreBaseWithClock(
+	dirName, _, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	unknownFile := "UNKNOWN_FILE"
-	fPath := filepath.Join(d, unknownFile)
-	s.loadHistory(fPath)
+	fPath := filepath.Join(dirName, unknownFile)
+	fStore.loadHistory(fPath)
 
 	chk.Log(
 		`loadHistory: open ` + fPath +
@@ -307,15 +307,15 @@ func TestWStoreBase_AddAllInvalidFile(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, _, s := setupWStoreBaseWithClock(
+	dirName, _, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	unknownFile := "UNKNOWN_FILE"
-	fPath := filepath.Join(d, unknownFile)
-	s.addAll(unknownFile, "", nil)
+	fPath := filepath.Join(dirName, unknownFile)
+	fStore.addAll(unknownFile, "", nil)
 
 	chk.Log(
 		`addAll(fName="` + unknownFile + `",isWanted=""): open ` + fPath +
@@ -327,33 +327,33 @@ func TestWStoreBase_GetUnknownInvalidKey(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, d, f, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{"", "|U|key1|Good"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	ts, v, ok := s.get("unknown key")
+	ts, v, ok := fStore.get("unknown key")
 	chk.False(ok)
 	chk.Str(v, "")
 	chk.True(ts.IsZero())
 
 	chk.Err(
-		s.update("k", "", 0),
+		fStore.update("k", "", 0),
 		"invalid data key",
 	)
 
 	chk.Err(
-		s.update("k|y", "", 0),
+		fStore.update("k|y", "", 0),
 		"invalid data key",
 	)
 
@@ -370,23 +370,23 @@ func TestWStoreBase_UpdateDeleteOnClosedFile(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
-	fPath := filepath.Join(d, f) + "_20000515" + fileExtension
+	fPath := filepath.Join(dirName, filename) + "_20000515" + fileExtension
 
-	chk.NoErr(s.Open())
-	chk.NoErr(s.currentFile.Close())
+	chk.NoErr(fStore.Open())
+	chk.NoErr(fStore.currentFile.Close())
 	chk.Err(
-		s.update("datKey", "value", 3),
+		fStore.update("datKey", "value", 3),
 		"write "+fPath+": file already closed",
 	)
 
 	chk.Err(
-		s.Delete("datKey"),
+		fStore.Delete("datKey"),
 		"write "+fPath+": file already closed",
 	)
 
@@ -403,23 +403,23 @@ func TestWStoreBase_OpenValidRecordExtraGroupSeperator(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, d, f, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{"", "|U|key1|Good"},
 			{"", "|U|key1|Good|extraSeparator"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	ts, v, ok := s.get("key1")
+	ts, v, ok := fStore.get("key1")
 	chk.True(ok)
 	chk.Str(ts.Format(fmtTimeStamp), "{{clkNano1}}")
 	chk.Str(v, "Good|extraSeparator")
@@ -434,42 +434,42 @@ func TestWStoreBase_OpenHistoryWithAppendToLastFile(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 1, d, f, [][2]string{
+		buildHistoryFile(chk, 1, dirName, filename, [][2]string{
 			{ /* clkNano0  */ "", "|U|key1|YesterdayKey1"},
 			{ /* clkNano1  */ "", "|U|key2|YesterdayKey2"},
 		}),
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, d, f, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano2  */ "", "|U|key1|TodayKey1_1"},
 			{ /* clkNano3  */ "", "|U|key2|TodayKey2_1"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	chk.Int(countFiles(d, f), 2) // Just two files
+	chk.Int(countFiles(dirName, filename), 2) // Just two files
 
-	chk.NoErr(s.update("key1", "TodayKey1_2", 2))
-	chk.NoErr(s.update("key2", "TodayKey2_2", 4))
+	chk.NoErr(fStore.update("key1", "TodayKey1_2", 2))
+	chk.NoErr(fStore.update("key2", "TodayKey2_2", 4))
 
-	chk.Int(countFiles(d, f), 2) // Last file was appended too.
+	chk.Int(countFiles(dirName, filename), 2) // Last file was appended too.
 
-	validateHistory(chk, s, "key1", 2,
+	validateHistory(chk, fStore, "key1", 2,
 		[]string{"{{clkNano0}}", "{{clkNano2}}", "{{clkNano4}}"},
 		[]string{"YesterdayKey1", "TodayKey1_1", "TodayKey1_2"},
 	)
 
-	validateHistory(chk, s, "key2", 2,
+	validateHistory(chk, fStore, "key2", 2,
 		[]string{"{{clkNano1}}", "{{clkNano3}}", "{{clkNano5}}"},
 		[]string{"YesterdayKey2", "TodayKey2_1", "TodayKey2_2"},
 	)
@@ -484,42 +484,42 @@ func TestWStoreBase_OpenHistoryWithNewFileRequired(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 2, d, f, [][2]string{
+		buildHistoryFile(chk, 2, dirName, filename, [][2]string{
 			{ /* clkNano0  */ "", "|U|key1|TwoDaysKey1"},
 			{ /* clkNano1  */ "", "|U|key2|TwoDaysKey2"},
 		}),
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 1, d, f, [][2]string{
+		buildHistoryFile(chk, 1, dirName, filename, [][2]string{
 			{ /* clkNano2  */ "", "|U|key1|YesterdayKey1"},
 			{ /* clkNano3  */ "", "|U|key2|YesterdayKey2"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	chk.Int(countFiles(d, f), 2) // Just two files
+	chk.Int(countFiles(dirName, filename), 2) // Just two files
 
-	chk.NoErr(s.update("key1", "TodayKey1", 2))
-	chk.NoErr(s.update("key2", "TodayKey2", 4))
+	chk.NoErr(fStore.update("key1", "TodayKey1", 2))
+	chk.NoErr(fStore.update("key2", "TodayKey2", 4))
 
-	chk.Int(countFiles(d, f), 3) // New file was generated.
+	chk.Int(countFiles(dirName, filename), 3) // New file was generated.
 
-	validateHistory(chk, s, "key1", 2,
+	validateHistory(chk, fStore, "key1", 2,
 		[]string{"{{clkNano0}}", "{{clkNano2}}", "{{clkNano4}}"},
 		[]string{"TwoDaysKey1", "YesterdayKey1", "TodayKey1"},
 	)
 
-	validateHistory(chk, s, "key2", 2,
+	validateHistory(chk, fStore, "key2", 2,
 		[]string{"{{clkNano1}}", "{{clkNano3}}", "{{clkNano5}}"},
 		[]string{"TwoDaysKey2", "YesterdayKey2", "TodayKey2"},
 	)
@@ -534,14 +534,14 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	d, f, s := setupWStoreBaseWithClock(
+	dirName, filename, fStore := setupWStoreBaseWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Second,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 2, d, f, [][2]string{
+		buildHistoryFile(chk, 2, dirName, filename, [][2]string{
 			{ /* clkNano0  */ "", "|U|key1|PreDelete"},
 			{ /* clkNano1  */ "", "|U|key2|PreDelete"},
 			{ /* clkNano2  */ "", "|D|key1|"},
@@ -552,24 +552,24 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 1, d, f, [][2]string{
+		buildHistoryFile(chk, 1, dirName, filename, [][2]string{
 			{ /* clkNano6  */ "", "|U|key1|PostDelete0"},
 			{ /* clkNano7  */ "", "|U|key2|PostDelete0"},
 		}),
 	)
 
 	chk.Err(
-		s.AddWindow("key1", "win1", time.Second),
+		fStore.AddWindow("key1", "win1", time.Second),
 		"",
 	)
 
 	chk.Err(
-		s.AddWindow("key2", "win2", time.Second*2),
+		fStore.AddWindow("key2", "win2", time.Second*2),
 		"",
 	)
 
 	chk.Err(
-		s.AddWindowThreshold("unknown", "unknown", 1, 2, 3, 4, func(
+		fStore.AddWindowThreshold("unknown", "unknown", 1, 2, 3, 4, func(
 			d, k string, f, t ThresholdReason, v float64,
 		) {
 		}),
@@ -577,7 +577,7 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	)
 
 	chk.Err(
-		s.AddWindowThreshold("key1", "unknown", 1, 3, 6, 8, func(
+		fStore.AddWindowThreshold("key1", "unknown", 1, 3, 6, 8, func(
 			d, k string, f, t ThresholdReason, v float64,
 		) {
 		}),
@@ -585,7 +585,7 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	)
 
 	chk.NoErr(
-		s.AddWindowThreshold("key1", "win1", 1, 2, 3, 4, func(
+		fStore.AddWindowThreshold("key1", "win1", 1, 2, 3, 4, func(
 			d, k string, f, t ThresholdReason, v float64,
 		) {
 			log.Printf("Threshold(%q,%q),from: %v, to: %v, value: %g",
@@ -595,7 +595,7 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 	)
 
 	chk.NoErr(
-		s.AddWindowThreshold("key2", "win2", 1, 3, 6, 9, func(
+		fStore.AddWindowThreshold("key2", "win2", 1, 3, 6, 9, func(
 			d, k string, f, t ThresholdReason, v float64,
 		) {
 			log.Printf("Threshold(%q,%q),from: %v, to: %v, value: %g",
@@ -604,82 +604,82 @@ func TestWStoreBase_UseCase1(t *testing.T) {
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(fStore.Open())
+	defer closeAndLogIfError(fStore)
 
-	chk.NoErr(s.update("key1", "Updated", 2))
-	chk.NoErr(s.update("key2", "Updated", 4))
+	chk.NoErr(fStore.update("key1", "Updated", 2))
+	chk.NoErr(fStore.update("key2", "Updated", 4))
 
-	validateHistory(chk, s, "key1", 2,
+	validateHistory(chk, fStore, "key1", 2,
 		[]string{"{{clkNano4}}", "{{clkNano6}}", "{{clkNano8}}"},
 		[]string{"PostDelete1", "PostDelete0", "Updated"},
 	)
 
-	validateHistory(chk, s, "key2", 2,
+	validateHistory(chk, fStore, "key2", 2,
 		[]string{"{{clkNano5}}", "{{clkNano7}}", "{{clkNano9}}"},
 		[]string{"PostDelete1", "PostDelete0", "Updated"},
 	)
 
 	chk.Err(
-		s.AddWindow("will", "fail", time.Second),
+		fStore.AddWindow("will", "fail", time.Second),
 		ErrOpenedWindow.Error(),
 	)
 
 	chk.Err(
-		s.AddWindowThreshold("key1", "win1", 1, 2, 3, 4, func(
+		fStore.AddWindowThreshold("key1", "win1", 1, 2, 3, 4, func(
 			datKey, winKey string, from, to ThresholdReason, v float64,
 		) {
 		}),
 		ErrOpenedWindowThreshold.Error(),
 	)
 
-	c, err := s.WindowCount("unknown", "unknown")
-	chk.Uint64(c, 0)
+	count, err := fStore.WindowCount("unknown", "unknown")
+	chk.Uint64(count, 0)
 	chk.Err(
 		err,
 		ErrUnknownDatKey.Error(),
 	)
 
-	a, err := s.WindowAverage("unknown", "unknown")
-	chk.Float64(a, 0, 0)
+	average, err := fStore.WindowAverage("unknown", "unknown")
+	chk.Float64(average, 0, 0)
 	chk.Err(
 		err,
 		ErrUnknownDatKey.Error(),
 	)
 
-	c, err = s.WindowCount("key1", "unknown")
-	chk.Uint64(c, 0)
+	count, err = fStore.WindowCount("key1", "unknown")
+	chk.Uint64(count, 0)
 	chk.Err(
 		err,
 		ErrUnknownWinKey.Error(),
 	)
 
-	a, err = s.WindowAverage("key1", "unknown")
-	chk.Float64(a, 0, 0)
+	average, err = fStore.WindowAverage("key1", "unknown")
+	chk.Float64(average, 0, 0)
 	chk.Err(
 		err,
 		ErrUnknownWinKey.Error(),
 	)
 
-	c, err = s.WindowCount("key1", "win1")
-	chk.Uint64(c, 1)
+	count, err = fStore.WindowCount("key1", "win1")
+	chk.Uint64(count, 1)
 	chk.NoErr(err)
 
-	a, err = s.WindowAverage("key1", "win1")
-	chk.Float64(a, 2, 0)
+	average, err = fStore.WindowAverage("key1", "win1")
+	chk.Float64(average, 2, 0)
 	chk.NoErr(err)
 
-	chk.NoErr(s.Delete("key1"))
+	chk.NoErr(fStore.Delete("key1"))
 
-	c, err = s.WindowCount("key1", "win1")
-	chk.Uint64(c, 0)
+	count, err = fStore.WindowCount("key1", "win1")
+	chk.Uint64(count, 0)
 	chk.Err(
 		err,
 		ErrNoWinData.Error(),
 	)
 
-	a, err = s.WindowAverage("key1", "win1")
-	chk.Float64(a, 0, 0)
+	average, err = fStore.WindowAverage("key1", "win1")
+	chk.Float64(average, 0, 0)
 	chk.Err(
 		err,
 		ErrNoWinData.Error(),

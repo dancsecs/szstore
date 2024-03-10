@@ -34,22 +34,22 @@ func setupWStoreFloat64WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewFloat64(dir, fName)
-	s.ts = chk.ClockNext
+	float64Store := NewFloat64(dirName, filename)
+	float64Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, float64Store
 }
 
 func validateFloat64History(
 	chk *sztest.Chk,
-	s *WStoreFloat64,
+	float64Store *WStoreFloat64,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateFloat64History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := float64Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Float64(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Float64(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := float64Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateFloat64History(
 func Test_WStoreFloat64_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreFloat64WithClock(
+
+	dirName, filename, float64Store := setupWStoreFloat64WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|1.7E+309"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(float64Store.Open())
+	defer closeAndLogIfError(float64Store)
 
-	validateFloat64History(chk, s, "key1", 0, // advances to clkNano2
+	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]float64{},
 	)
 
-	validateFloat64History(chk, s, "key2", 0, // advances to clkNano2
+	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]float64{},
 	)
 
-	chk.NoErr(s.Update("key1", 200.0))  // clkNano4
-	chk.NoErr(s.Update("key2", -200.0)) // clkNano5
+	chk.NoErr(float64Store.Update("key1", 200.0))  // clkNano4
+	chk.NoErr(float64Store.Update("key2", -200.0)) // clkNano5
 
-	validateFloat64History(chk, s, "key1", 0, // advances to clkNano6
+	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]float64{200.0},
 	)
 
-	validateFloat64History(chk, s, "key2", 0, // advances to clkNano7
+	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]float64{-200.0},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(float64Store.Delete("key1")) // clkNano8
+	chk.NoErr(float64Store.Delete("key2")) // clkNano9
 
-	validateFloat64History(chk, s, "key1", 0, // advances to clkNano10
+	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]float64{},
 	)
 
-	validateFloat64History(chk, s, "key2", 0, // advances to clkNano11
+	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]float64{},
 	)
 
-	chk.NoErr(s.Update("key1", 222.0))  // clkNano12
-	chk.NoErr(s.Update("key2", -222.0)) // clkNano13
+	chk.NoErr(float64Store.Update("key1", 222.0))  // clkNano12
+	chk.NoErr(float64Store.Update("key2", -222.0)) // clkNano13
 
-	validateFloat64History(chk, s, "key1", 0, // advances to clkNano14
+	validateFloat64History(chk, float64Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]float64{222.0},
 	)
 
-	validateFloat64History(chk, s, "key2", 0, // advances to clkNano15
+	validateFloat64History(chk, float64Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]float64{-222.0},
 	)

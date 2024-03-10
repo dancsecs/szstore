@@ -34,22 +34,22 @@ func setupWStoreInt32WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewInt32(dir, fName)
-	s.ts = chk.ClockNext
+	int32Store := NewInt32(dirName, filename)
+	int32Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, int32Store
 }
 
 func validateInt32History(
 	chk *sztest.Chk,
-	s *WStoreInt32,
+	int32Store *WStoreInt32,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateInt32History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, values, ok := int32Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Int32(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Int32(values, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := int32Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateInt32History(
 func Test_WStoreInt32_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreInt32WithClock(
+
+	dirName, filename, int32Store := setupWStoreInt32WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|2147483648"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(int32Store.Open())
+	defer closeAndLogIfError(int32Store)
 
-	validateInt32History(chk, s, "key1", 0, // advances to clkNano2
+	validateInt32History(chk, int32Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]int32{},
 	)
 
-	validateInt32History(chk, s, "key2", 0, // advances to clkNano2
+	validateInt32History(chk, int32Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]int32{},
 	)
 
-	chk.NoErr(s.Update("key1", 200))  // clkNano4
-	chk.NoErr(s.Update("key2", -200)) // clkNano5
+	chk.NoErr(int32Store.Update("key1", 200))  // clkNano4
+	chk.NoErr(int32Store.Update("key2", -200)) // clkNano5
 
-	validateInt32History(chk, s, "key1", 0, // advances to clkNano6
+	validateInt32History(chk, int32Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]int32{200},
 	)
 
-	validateInt32History(chk, s, "key2", 0, // advances to clkNano7
+	validateInt32History(chk, int32Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]int32{-200},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(int32Store.Delete("key1")) // clkNano8
+	chk.NoErr(int32Store.Delete("key2")) // clkNano9
 
-	validateInt32History(chk, s, "key1", 0, // advances to clkNano10
+	validateInt32History(chk, int32Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]int32{},
 	)
 
-	validateInt32History(chk, s, "key2", 0, // advances to clkNano11
+	validateInt32History(chk, int32Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]int32{},
 	)
 
-	chk.NoErr(s.Update("key1", 222))  // clkNano12
-	chk.NoErr(s.Update("key2", -222)) // clkNano13
+	chk.NoErr(int32Store.Update("key1", 222))  // clkNano12
+	chk.NoErr(int32Store.Update("key2", -222)) // clkNano13
 
-	validateInt32History(chk, s, "key1", 0, // advances to clkNano14
+	validateInt32History(chk, int32Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]int32{222},
 	)
 
-	validateInt32History(chk, s, "key2", 0, // advances to clkNano15
+	validateInt32History(chk, int32Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]int32{-222},
 	)

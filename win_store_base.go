@@ -53,8 +53,8 @@ type fileStore struct {
 	rwMutex sync.RWMutex
 
 	opened          bool
-	fileNameRoot    string
-	dir             string
+	filenameRoot    string
+	dirName         string
 	currentFile     *os.File
 	currentFileDate string
 	fileHistory     []string
@@ -74,16 +74,16 @@ type fileStore struct {
 }
 
 // newFileStore opens or creates a fileStore object.
-func newFileStore(dir, fileNameRoot string) *fileStore {
-	fs := new(fileStore)
-	fs.opened = false
-	fs.dir = dir
-	fs.fileNameRoot = fileNameRoot
-	fs.data = make(map[string]*dataPoint)
-	fs.winDB = make(map[string]*winDB)
-	fs.ts = time.Now // Default
+func newFileStore(dirName, filenameRoot string) *fileStore {
+	fStore := new(fileStore)
+	fStore.opened = false
+	fStore.dirName = dirName
+	fStore.filenameRoot = filenameRoot
+	fStore.data = make(map[string]*dataPoint)
+	fStore.winDB = make(map[string]*winDB)
+	fStore.ts = time.Now // Default
 
-	return fs
+	return fStore
 }
 
 func (fs *fileStore) logMsg(msg string) bool {
@@ -104,29 +104,29 @@ func (fs *fileStore) Open() error {
 	defer fs.rwMutex.Unlock()
 
 	log.Printf(
-		"opening file based szStore %s in directory %s", fs.fileNameRoot, fs.dir,
+		"opening file based szStore %s in directory %s", fs.filenameRoot, fs.dirName,
 	)
 
 	var startingFilePath string
 	// Catalog data store file history.
 
-	allFiles, err := os.ReadDir(fs.dir)
+	allFiles, err := os.ReadDir(fs.dirName)
 	if err != nil {
 		return err //nolint:wrapcheck // Ok.
 	}
 
 	for _, fileInf := range allFiles {
-		if strings.HasPrefix(fileInf.Name(), fs.fileNameRoot) {
+		if strings.HasPrefix(fileInf.Name(), fs.filenameRoot) {
 			fs.fileHistory = append(fs.fileHistory, fileInf.Name())
 		}
 	}
 
 	if len(fs.fileHistory) > 0 {
 		for _, n := range fs.fileHistory {
-			fs.loadHistory(fs.dir + string(os.PathSeparator) + n)
+			fs.loadHistory(fs.dirName + string(os.PathSeparator) + n)
 		}
 
-		startingFilePath = fs.dir +
+		startingFilePath = fs.dirName +
 			string(os.PathSeparator) +
 			fs.fileHistory[len(fs.fileHistory)-1]
 		log.Print("starting path retrieved as: " + startingFilePath)
@@ -154,9 +154,9 @@ func (fs *fileStore) Open() error {
 }
 
 func (fs *fileStore) generateFilePath(t time.Time) string {
-	return fs.dir +
+	return fs.dirName +
 		string(os.PathSeparator) +
-		fs.fileNameRoot + "_" +
+		fs.filenameRoot + "_" +
 		t.Format(fmtDateStamp) + fileExtension
 }
 
@@ -185,7 +185,7 @@ func (fs *fileStore) loadHistoryFile(
 		fs.fLine = scanner.Text()
 		fs.fLineNum++
 
-		ts, action, datKey, value, ok := fs.splitRecord(fName, fs.fLine)
+		timestamp, action, datKey, value, ok := fs.splitRecord(fName, fs.fLine)
 		if ok {
 			if action == ActionDelete {
 				wdb, ok := fs.winDB[datKey]
@@ -195,7 +195,7 @@ func (fs *fileStore) loadHistoryFile(
 
 				delete(fs.data, datKey)
 			} else {
-				fs.load(ts, datKey, value)
+				fs.load(timestamp, datKey, value)
 			}
 		}
 	}
@@ -234,85 +234,85 @@ func (fs *fileStore) splitRecord(filePath string, data string) (
 	const proc = "splitRecord: "
 
 	var (
-		err    error
-		ts     time.Time
-		action Action
-		key    string
-		value  string
+		err       error
+		timestamp time.Time
+		action    Action
+		key       string
+		value     string
 	)
 
-	f := strings.SplitN(data, groupSeparator, expectedNumberOfFields)
-	if len(f) != expectedNumberOfFields {
-		return ts, action, key, value,
+	fields := strings.SplitN(data, groupSeparator, expectedNumberOfFields)
+	if len(fields) != expectedNumberOfFields {
+		return timestamp, action, key, value,
 			fs.logMsg(
 				proc +
 					"invalid number of fields: \"" +
-					strconv.FormatInt(int64(len(f)), 10) + `"`,
+					strconv.FormatInt(int64(len(fields)), 10) + `"`,
 			)
 	}
 
 	//nolint:gosmopolitan // Internal logs are all in local time.
-	ts, err = time.ParseInLocation(fmtTimeStamp, f[0], time.Local)
+	timestamp, err = time.ParseInLocation(fmtTimeStamp, fields[0], time.Local)
 	if err != nil {
-		return ts, action, key, value, fs.logMsg(
-			proc + "invalid date: \"" + f[0] + `"`,
+		return timestamp, action, key, value, fs.logMsg(
+			proc + "invalid date: \"" + fields[0] + `"`,
 		)
 	}
 
-	if len(f[1]) != 1 {
-		return ts, action, key, value, fs.logMsg(
-			proc + "invalid action: \"" + f[1] + `"`,
+	if len(fields[1]) != 1 {
+		return timestamp, action, key, value, fs.logMsg(
+			proc + "invalid action: \"" + fields[1] + `"`,
 		)
 	}
 
-	action = Action([]byte(f[1])[0])
+	action = Action([]byte(fields[1])[0])
 	if action != ActionUpdate && action != ActionDelete {
-		return ts, action, key, value, fs.logMsg(
-			proc + "invalid action: \"" + f[1] + `"`,
+		return timestamp, action, key, value, fs.logMsg(
+			proc + "invalid action: \"" + fields[1] + `"`,
 		)
 	}
 
-	if !strings.HasPrefix(f[0], filePath[len(filePath)-12:len(filePath)-4]) {
-		return ts, action, key, value, fs.logMsg(
-			proc + "invalid date mismatch: \"" + f[0][:8] + `"`,
+	if !strings.HasPrefix(fields[0], filePath[len(filePath)-12:len(filePath)-4]) {
+		return timestamp, action, key, value, fs.logMsg(
+			proc + "invalid date mismatch: \"" + fields[0][:8] + `"`,
 		)
 	}
 
-	if len(f[2]) < minKeyLength {
-		return ts, action, key, value, fs.logMsg(
-			proc + "invalid key length (>= 2 characters): \"" + f[2] + `"`,
+	if len(fields[2]) < minKeyLength {
+		return timestamp, action, key, value, fs.logMsg(
+			proc + "invalid key length (>= 2 characters): \"" + fields[2] + `"`,
 		)
 	}
 
-	key = f[2]
-	value = f[3]
+	key = fields[2]
+	value = fields[3]
 
-	return ts, action, key, value, true
+	return timestamp, action, key, value, true
 }
 
 func (fs *fileStore) load(timeStamp time.Time, key, value string) {
-	t, ok := fs.data[key]
+	data, ok := fs.data[key]
 	if !ok {
-		t = new(dataPoint)
-		fs.data[key] = t
+		data = new(dataPoint)
+		fs.data[key] = data
 
 		if _, ok := fs.winDB[key]; !ok {
 			fs.winDB[key] = newWinDB(key)
 		}
-	} else if t.TS.After(timeStamp) {
+	} else if data.TS.After(timeStamp) {
 		fs.logMsg(
 			fmt.Sprintf("load: invalid timestamp out of sequence:"+
 				" received date: %s last date: %s",
 				timeStamp.Format(fmtTimeStamp),
-				t.TS.Format(fmtTimeStamp),
+				data.TS.Format(fmtTimeStamp),
 			),
 		)
 
 		return
 	}
 
-	t.TS = timeStamp
-	t.Value = value
+	data.TS = timeStamp
+	data.Value = value
 }
 
 func (fs *fileStore) writeToFile(
@@ -320,18 +320,18 @@ func (fs *fileStore) writeToFile(
 ) (time.Time, error) {
 	var err error
 
-	ts := fs.ts()
+	timestamp := fs.ts()
 
-	if ts.Format(fmtDateStamp) != fs.currentFileDate {
-		var fi os.FileInfo
+	if timestamp.Format(fmtDateStamp) != fs.currentFileDate {
+		var fileInfo os.FileInfo
 
-		fPath := fs.generateFilePath(ts)
+		fPath := fs.generateFilePath(timestamp)
 
 		err = fs.openFile(fPath)
 		if err == nil {
-			fi, err = os.Stat(fPath)
+			fileInfo, err = os.Stat(fPath)
 			if err == nil {
-				fs.fileHistory = append(fs.fileHistory, fi.Name())
+				fs.fileHistory = append(fs.fileHistory, fileInfo.Name())
 			}
 		}
 	}
@@ -339,12 +339,12 @@ func (fs *fileStore) writeToFile(
 	if err == nil {
 		entry := fmt.Sprintf(
 			"%s|%c|%s|%s\n",
-			ts.Format(fmtTimeStamp), action, key, value,
+			timestamp.Format(fmtTimeStamp), action, key, value,
 		)
 		_, err = fs.currentFile.WriteString(entry)
 	}
 
-	return ts, err //nolint:wrapcheck // Ok.
+	return timestamp, err //nolint:wrapcheck // Ok.
 }
 
 // get returns the last value set for the specific key.
@@ -365,25 +365,25 @@ func (fs *fileStore) get(datKey string) (time.Time, string, bool) {
 // getHistoryDays returns all measures since the provided number of days.  A
 // zero represents the current day only.
 func (fs *fileStore) getHistoryDays(
-	id string, days uint, add func(Action, time.Time, string),
+	datKey string, days uint, add func(Action, time.Time, string),
 ) {
 	fs.rwMutex.RLock()
 	defer fs.rwMutex.RUnlock()
 
-	minFile := fs.fileNameRoot +
+	minFile := fs.filenameRoot +
 		"_" +
 		fs.ts().AddDate(0, 0, -1*int(days)).Format(fmtDateStamp)
 	found := false
 
-	for _, fi := range fs.fileHistory {
+	for _, filename := range fs.fileHistory {
 		if !found {
-			if fi >= minFile {
+			if filename >= minFile {
 				found = true
 			}
 		}
 
 		if found {
-			fs.addAll(fi, id, add)
+			fs.addAll(filename, datKey, add)
 		}
 	}
 }
@@ -399,38 +399,38 @@ func (fs *fileStore) addAll(
 		fs.fLine = ""
 	}()
 
-	fPath := fs.dir + string(os.PathSeparator) + fName
-	f, err := os.Open(fPath) //nolint:gosec // Ok.
+	fPath := fs.dirName + string(os.PathSeparator) + fName
+	dataFile, err := os.Open(fPath) //nolint:gosec // Ok.
 
 	if err == nil {
-		defer closeAndLogIfError(f)
+		defer closeAndLogIfError(dataFile)
 
 		fs.fName = fPath
 		fs.fLineNum = 0
-		s := bufio.NewScanner(f)
+		scanner := bufio.NewScanner(dataFile)
 
-		for s.Scan() {
-			fs.fLine = s.Text()
+		for scanner.Scan() {
+			fs.fLine = scanner.Text()
 			fs.fLineNum++
-			ts, action, id, value, ok := fs.splitRecord(fPath, s.Text())
+			timestamp, action, id, value, ok := fs.splitRecord(fPath, scanner.Text())
 
 			if ok && id == idWanted {
-				if lastTS.After(ts) {
+				if lastTS.After(timestamp) {
 					fs.logMsg(
 						fmt.Sprintf("addAll: invalid timestamp out of sequence:"+
 							" received date: %s last date: %s",
-							ts.Format(fmtTimeStamp),
+							timestamp.Format(fmtTimeStamp),
 							lastTS.Format(fmtTimeStamp),
 						),
 					)
 				} else {
-					add(action, ts, value)
-					lastTS = ts
+					add(action, timestamp, value)
+					lastTS = timestamp
 				}
 			}
 		}
 
-		err = s.Err()
+		err = scanner.Err()
 	}
 
 	if err != nil {
@@ -442,14 +442,14 @@ func (fs *fileStore) addAll(
 
 // update adds or changes the value associated with a specific storage key.
 func (fs *fileStore) update(
-	key string, value string, f float64,
+	key string, value string, floatValue float64,
 ) error {
 	fs.rwMutex.Lock()
 	defer fs.rwMutex.Unlock()
 
 	var (
-		err error
-		ts  time.Time
+		err       error
+		timestamp time.Time
 	)
 
 	if len(key) < minKeyLength || strings.Contains(key, groupSeparator) {
@@ -460,15 +460,15 @@ func (fs *fileStore) update(
 		return ErrInvalidDatKey
 	}
 
-	ts, err = fs.writeToFile('U', key, value)
+	timestamp, err = fs.writeToFile('U', key, value)
 	if err != nil {
 		fs.logMsg(
 			fmt.Sprintf("update(key=%q,value=%q) failed: %v", key, value, err),
 		)
 	}
 
-	fs.load(ts, key, value)
-	fs.winDB[key].addValue(ts, f)
+	fs.load(timestamp, key, value)
+	fs.winDB[key].addValue(timestamp, floatValue)
 
 	return err
 }
@@ -508,7 +508,7 @@ func (fs *fileStore) Close() error {
 
 // AddWindow creates a named window for the specified key.
 func (fs *fileStore) AddWindow(
-	datKey, winKey string, p time.Duration,
+	datKey, winKey string, timePeriod time.Duration,
 ) error {
 	fs.rwMutex.Lock()
 	defer fs.rwMutex.Unlock()
@@ -523,13 +523,13 @@ func (fs *fileStore) AddWindow(
 		fs.winDB[datKey] = winDB
 	}
 
-	return winDB.addWindow(winKey, p)
+	return winDB.addWindow(winKey, timePeriod)
 }
 
 // AddWindowThreshold provides a monitor of a average.
 func (fs *fileStore) AddWindowThreshold(datKey, winKey string,
 	lowCritical, lowWarning, highWarning, highCritical float64,
-	f ThresholdCallbackFunc,
+	notifyFunc ThresholdNotifyFunc,
 ) error {
 	fs.rwMutex.Lock()
 	defer fs.rwMutex.Unlock()
@@ -545,7 +545,7 @@ func (fs *fileStore) AddWindowThreshold(datKey, winKey string,
 
 	return dw.addThreshold(winKey,
 		lowCritical, lowWarning, highWarning, highCritical,
-		f,
+		notifyFunc,
 	)
 }
 

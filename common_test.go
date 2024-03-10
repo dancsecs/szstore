@@ -28,11 +28,11 @@ import (
 
 func buildHistoryFile(
 	chk *sztest.Chk,
-	daysAgo int, d, f string, data [][2]string,
+	daysAgo int, dirName, filenameRoot string, data [][2]string,
 ) error {
 	chk.T().Helper()
 
-	fd := ""
+	fileData := ""
 	resetClk := chk.ClockOffsetDay(-daysAgo)
 
 	chk.ClockAddSub(sztest.ClockSubNano)
@@ -41,19 +41,19 @@ func buildHistoryFile(
 		defer resetClk()
 	}
 
-	for _, e := range data {
-		ts := ""
-		if e[0] == "" {
-			ts = chk.ClockNextFmtNano()
+	for _, entry := range data {
+		timestamp := ""
+		if entry[0] == "" {
+			timestamp = chk.ClockNextFmtNano()
 		} else {
-			ts = e[0]
+			timestamp = entry[0]
 		}
 
-		fd += ts + e[1] + "\n"
+		fileData += timestamp + entry[1] + "\n"
 	}
 
-	fPath := filepath.Join(d, f+"_"+chk.ClockLastFmtDate()+fileExtension)
-	err := os.WriteFile(fPath, []byte(fd), 0o0600)
+	fPath := filepath.Join(dirName, filenameRoot+"_"+chk.ClockLastFmtDate()+fileExtension)
+	err := os.WriteFile(fPath, []byte(fileData), 0o0600)
 
 	chk.AddSub("{{hPath"+strconv.FormatInt(int64(daysAgo), base10)+"}}", fPath)
 

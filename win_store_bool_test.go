@@ -26,124 +26,6 @@ import (
 	"github.com/dancsecs/sztest"
 )
 
-func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
-	chk := sztest.CaptureLog(t)
-	defer chk.Release()
-
-	dir, file, s := setupWStoreBoolWithClock(
-		chk,
-		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
-		time.Millisecond*20,
-	)
-
-	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
-			{"", "|U|key2|false"},
-			{"", "|U|key2|true"},
-		}),
-	)
-
-	chk.NoErr(
-		s.AddWindow("key2", "18Milliseconds", time.Millisecond*18),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 1.2, 0.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 1.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 1.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, 1.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", -0.2, 0.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, -0.4, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, -0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, -0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidBoolThreshold.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.4, 0.2, 0.6, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidThresholdOrder.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.6, 0.4, 0.8,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidThresholdOrder.Error(),
-	)
-
-	chk.Err(
-		s.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.8, 0.6,
-			func(k, w string, o, n ThresholdReason, v float64) {
-			},
-		),
-		ErrInvalidThresholdOrder.Error(),
-	)
-
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
-
-	chk.Log(
-		"opening file based szStore {{file}} in directory {{dir}}",
-		"starting path retrieved as: {{hPath0}}",
-	)
-}
-
 func setupWStoreBoolWithClock(
 	chk *sztest.Chk,
 	initialTime time.Time, inc ...time.Duration,
@@ -153,22 +35,22 @@ func setupWStoreBoolWithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewBool(dir, fName)
-	s.ts = chk.ClockNext
+	boolStore := NewBool(dirName, filename)
+	boolStore.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, boolStore
 }
 
 func validateBoolHistory(
 	chk *sztest.Chk,
-	s *WStoreBool,
+	boolStore *WStoreBool,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -176,17 +58,17 @@ func validateBoolHistory(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := boolStore.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Bool(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Bool(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := boolStore.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -198,70 +80,189 @@ func validateBoolHistory(
 	chk.BoolSlice(vSlice, expVSlice, 0)
 }
 
-func Test_WStoreBool_UseCase(t *testing.T) {
+func TestSzStoreBool_InvalidBoolThresholds(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreBoolWithClock(
+
+	dirName, filename, boolStore := setupWStoreBoolWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
+			{"", "|U|key2|false"},
+			{"", "|U|key2|true"},
+		}),
+	)
+
+	chk.NoErr(
+		boolStore.AddWindow("key2", "18Milliseconds", time.Millisecond*18),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 1.2, 0.4, 0.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 1.4, 0.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 1.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, 1.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", -0.2, 0.4, 0.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, -0.4, 0.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, -0.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.6, -0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidBoolThreshold.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.4, 0.2, 0.6, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidThresholdOrder.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.6, 0.4, 0.8,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidThresholdOrder.Error(),
+	)
+
+	chk.Err(
+		boolStore.AddWindowThreshold("key2", "18Milliseconds", 0.2, 0.4, 0.8, 0.6,
+			func(k, w string, o, n ThresholdReason, v float64) {
+			},
+		),
+		ErrInvalidThresholdOrder.Error(),
+	)
+
+	chk.NoErr(boolStore.Open())
+	defer closeAndLogIfError(boolStore)
+
+	chk.Log(
+		"opening file based szStore {{file}} in directory {{dir}}",
+		"starting path retrieved as: {{hPath0}}",
+	)
+}
+
+func Test_WStoreBool_UseCase(t *testing.T) {
+	chk := sztest.CaptureLog(t)
+	defer chk.Release()
+
+	dirName, filename, boolStore := setupWStoreBoolWithClock(
+		chk,
+		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
+		time.Millisecond*20,
+	)
+
+	chk.NoErr(
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|def"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(boolStore.Open())
+	defer closeAndLogIfError(boolStore)
 
-	validateBoolHistory(chk, s, "key1", 0, // advances to clkNano2
+	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]bool{},
 	)
 
-	validateBoolHistory(chk, s, "key2", 0, // advances to clkNano2
+	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]bool{},
 	)
 
-	chk.NoErr(s.Update("key1", true))  // clkNano4
-	chk.NoErr(s.Update("key2", false)) // clkNano5
+	chk.NoErr(boolStore.Update("key1", true))  // clkNano4
+	chk.NoErr(boolStore.Update("key2", false)) // clkNano5
 
-	validateBoolHistory(chk, s, "key1", 0, // advances to clkNano6
+	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]bool{true},
 	)
 
-	validateBoolHistory(chk, s, "key2", 0, // advances to clkNano7
+	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]bool{false},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(boolStore.Delete("key1")) // clkNano8
+	chk.NoErr(boolStore.Delete("key2")) // clkNano9
 
-	validateBoolHistory(chk, s, "key1", 0, // advances to clkNano10
+	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]bool{},
 	)
 
-	validateBoolHistory(chk, s, "key2", 0, // advances to clkNano11
+	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]bool{},
 	)
 
-	chk.NoErr(s.Update("key1", false)) // clkNano12
-	chk.NoErr(s.Update("key2", true))  // clkNano13
+	chk.NoErr(boolStore.Update("key1", false)) // clkNano12
+	chk.NoErr(boolStore.Update("key2", true))  // clkNano13
 
-	validateBoolHistory(chk, s, "key1", 0, // advances to clkNano14
+	validateBoolHistory(chk, boolStore, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]bool{false},
 	)
 
-	validateBoolHistory(chk, s, "key2", 0, // advances to clkNano15
+	validateBoolHistory(chk, boolStore, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]bool{true},
 	)
@@ -296,14 +297,14 @@ func TestSzStoreBool_UseCase3(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	dir, file, boolStore := setupWStoreBoolWithClock(
+	dirName, filename, boolStore := setupWStoreBoolWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*3,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{"", "|U|key1|false"},
 		}),
 	)

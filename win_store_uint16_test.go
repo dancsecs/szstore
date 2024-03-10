@@ -34,22 +34,22 @@ func setupWStoreUint16WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewUint16(dir, fName)
-	s.ts = chk.ClockNext
+	uint16Store := NewUint16(dirName, filename)
+	uint16Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, uint16Store
 }
 
 func validateUint16History(
 	chk *sztest.Chk,
-	s *WStoreUint16,
+	uint16Store *WStoreUint16,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateUint16History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := uint16Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Uint16(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Uint16(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := uint16Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateUint16History(
 func Test_WStoreUint16_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreUint16WithClock(
+
+	dirName, filename, uint16Store := setupWStoreUint16WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|65536"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(uint16Store.Open())
+	defer closeAndLogIfError(uint16Store)
 
-	validateUint16History(chk, s, "key1", 0, // advances to clkNano2
+	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]uint16{},
 	)
 
-	validateUint16History(chk, s, "key2", 0, // advances to clkNano2
+	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]uint16{},
 	)
 
-	chk.NoErr(s.Update("key1", 200)) // clkNano4
-	chk.NoErr(s.Update("key2", 400)) // clkNano5
+	chk.NoErr(uint16Store.Update("key1", 200)) // clkNano4
+	chk.NoErr(uint16Store.Update("key2", 400)) // clkNano5
 
-	validateUint16History(chk, s, "key1", 0, // advances to clkNano6
+	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint16{200},
 	)
 
-	validateUint16History(chk, s, "key2", 0, // advances to clkNano7
+	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint16{400},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(uint16Store.Delete("key1")) // clkNano8
+	chk.NoErr(uint16Store.Delete("key2")) // clkNano9
 
-	validateUint16History(chk, s, "key1", 0, // advances to clkNano10
+	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]uint16{},
 	)
 
-	validateUint16History(chk, s, "key2", 0, // advances to clkNano11
+	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]uint16{},
 	)
 
-	chk.NoErr(s.Update("key1", 222)) // clkNano12
-	chk.NoErr(s.Update("key2", 444)) // clkNano13
+	chk.NoErr(uint16Store.Update("key1", 222)) // clkNano12
+	chk.NoErr(uint16Store.Update("key2", 444)) // clkNano13
 
-	validateUint16History(chk, s, "key1", 0, // advances to clkNano14
+	validateUint16History(chk, uint16Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint16{222},
 	)
 
-	validateUint16History(chk, s, "key2", 0, // advances to clkNano15
+	validateUint16History(chk, uint16Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint16{444},
 	)

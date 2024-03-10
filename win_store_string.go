@@ -34,8 +34,8 @@ type WStoreString struct {
 }
 
 // NewString a new Store object.
-func NewString(dir, fName string) *WStoreString {
-	s := newFileStore(dir, fName)
+func NewString(dirName, filenameRoot string) *WStoreString {
+	s := newFileStore(dirName, filenameRoot)
 	newWStoreString := new(WStoreString)
 	newWStoreString.fileStore = s
 
@@ -109,24 +109,24 @@ func (s *WStoreString) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []string) {
 	var (
-		t []time.Time
-		v []string
+		timestamps []time.Time
+		values     []string
 	)
 
 	s.fileStore.getHistoryDays(key, days,
-		func(a Action, ts time.Time, raw string) {
+		func(a Action, timestamp time.Time, raw string) {
 			if a == ActionDelete {
-				t = nil
-				v = nil
+				timestamps = nil
+				values = nil
 			} else {
 				vParsed, ok := s.parseString(raw)
 				if ok {
-					t = append(t, ts)
-					v = append(v, vParsed)
+					timestamps = append(timestamps, timestamp)
+					values = append(values, vParsed)
 				}
 			}
 		},
 	)
 
-	return t, v
+	return timestamps, values
 }

@@ -31,8 +31,8 @@ type WStoreBool struct {
 }
 
 // NewBool a new Store object.
-func NewBool(dir, fName string) *WStoreBool {
-	store := newFileStore(dir, fName)
+func NewBool(dirName, filenameRoot string) *WStoreBool {
+	store := newFileStore(dirName, filenameRoot)
 
 	return &WStoreBool{
 		fileStore: store,
@@ -80,37 +80,37 @@ func (s *WStoreBool) Get(datKey string) (time.Time, bool, bool) {
 // GetHistoryDays returns all values made over the specified number of days.
 // A zero represent only the current day.
 func (s *WStoreBool) GetHistoryDays(
-	key string, days uint,
+	datKey string, days uint,
 ) ([]time.Time, []bool) {
 	var (
-		t []time.Time
-		v []bool
+		timestamps []time.Time
+		values     []bool
 	)
 
 	s.fileStore.getHistoryDays(
-		key, days, func(a Action, ts time.Time, raw string,
+		datKey, days, func(a Action, timestamp time.Time, raw string,
 		) {
 			if a == ActionDelete {
-				t = nil
-				v = nil
+				timestamps = nil
+				values = nil
 			} else {
 				vParsed, ok := s.parseBool(raw)
 				if ok {
-					t = append(t, ts)
-					v = append(v, vParsed)
+					timestamps = append(timestamps, timestamp)
+					values = append(values, vParsed)
 				}
 			}
 		},
 	)
 
-	return t, v
+	return timestamps, values
 }
 
 // AddWindowThreshold adds the provided threshold data to the indicated numeric
 // window.
 func (s *WStoreBool) AddWindowThreshold(datKey, winKey string,
 	lowCritical, lowWarning, highWarning, highCritical float64,
-	f ThresholdCallbackFunc,
+	notifyFunc ThresholdNotifyFunc,
 ) error {
 	if lowCritical < 0.0 || lowCritical > 1.0 ||
 		lowWarning < 0.0 || lowWarning > 1.0 ||
@@ -122,6 +122,6 @@ func (s *WStoreBool) AddWindowThreshold(datKey, winKey string,
 
 	return s.fileStore.AddWindowThreshold(datKey, winKey,
 		lowCritical, lowWarning, highWarning, highCritical,
-		f,
+		notifyFunc,
 	)
 }

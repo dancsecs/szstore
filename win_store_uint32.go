@@ -31,32 +31,32 @@ type WStoreUint32 struct {
 }
 
 // NewUint32 a new Store object.
-func NewUint32(dir, fName string) *WStoreUint32 {
+func NewUint32(dirName, filenameRoot string) *WStoreUint32 {
 	return &WStoreUint32{
-		fileStore: newFileStore(dir, fName),
+		fileStore: newFileStore(dirName, filenameRoot),
 	}
 }
 
 func (s *WStoreUint32) parseUint32(raw string) (uint32, bool) {
-	v, err := strconv.ParseUint(raw, 10, 32)
+	value, err := strconv.ParseUint(raw, 10, 32)
 	if err != nil {
 		errMsg := "parseUint32: invalid "
 
 		switch {
 		case errors.Is(err, strconv.ErrRange):
 			errMsg += rangeErrPrefix
-			v = 0
+			value = 0
 		default: //  errors.Is(err, strconv.ErrSyntax):
 			errMsg += syntaxErrPrefix
-			v = 0
+			value = 0
 		}
 
 		s.logMsg(errMsg + strconv.Quote(raw))
 
-		return uint32(v), false
+		return uint32(value), false
 	}
 
-	return uint32(v), true
+	return uint32(value), true
 }
 
 // Update creates or updates a new key value.
@@ -85,25 +85,25 @@ func (s *WStoreUint32) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []uint32) {
 	var (
-		t []time.Time
-		v []uint32
+		timestamps []time.Time
+		values     []uint32
 	)
 
 	s.fileStore.getHistoryDays(
-		key, days, func(a Action, ts time.Time, raw string,
+		key, days, func(a Action, timestamp time.Time, raw string,
 		) {
 			if a == ActionDelete {
-				t = nil
-				v = nil
+				timestamps = nil
+				values = nil
 			} else {
 				v32, ok := s.parseUint32(raw)
 				if ok {
-					t = append(t, ts)
-					v = append(v, v32)
+					timestamps = append(timestamps, timestamp)
+					values = append(values, v32)
 				}
 			}
 		},
 	)
 
-	return t, v
+	return timestamps, values
 }

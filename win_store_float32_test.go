@@ -34,22 +34,22 @@ func setupWStoreFloat32WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewFloat32(dir, fName)
-	s.ts = chk.ClockNext
+	float32Store := NewFloat32(dirName, filename)
+	float32Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, float32Store
 }
 
 func validateFloat32History(
 	chk *sztest.Chk,
-	s *WStoreFloat32,
+	float32Store *WStoreFloat32,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateFloat32History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := float32Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Float32(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Float32(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := float32Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateFloat32History(
 func Test_WStoreFloat32_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreFloat32WithClock(
+
+	dirName, filename, float32Store := setupWStoreFloat32WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|1.7E+309"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(float32Store.Open())
+	defer closeAndLogIfError(float32Store)
 
-	validateFloat32History(chk, s, "key1", 0, // advances to clkNano2
+	validateFloat32History(chk, float32Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]float32{},
 	)
 
-	validateFloat32History(chk, s, "key2", 0, // advances to clkNano2
+	validateFloat32History(chk, float32Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]float32{},
 	)
 
-	chk.NoErr(s.Update("key1", 200.0))  // clkNano4
-	chk.NoErr(s.Update("key2", -200.0)) // clkNano5
+	chk.NoErr(float32Store.Update("key1", 200.0))  // clkNano4
+	chk.NoErr(float32Store.Update("key2", -200.0)) // clkNano5
 
-	validateFloat32History(chk, s, "key1", 0, // advances to clkNano6
+	validateFloat32History(chk, float32Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]float32{200.0},
 	)
 
-	validateFloat32History(chk, s, "key2", 0, // advances to clkNano7
+	validateFloat32History(chk, float32Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]float32{-200.0},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(float32Store.Delete("key1")) // clkNano8
+	chk.NoErr(float32Store.Delete("key2")) // clkNano9
 
-	validateFloat32History(chk, s, "key1", 0, // advances to clkNano10
+	validateFloat32History(chk, float32Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]float32{},
 	)
 
-	validateFloat32History(chk, s, "key2", 0, // advances to clkNano11
+	validateFloat32History(chk, float32Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]float32{},
 	)
 
-	chk.NoErr(s.Update("key1", 222.0))  // clkNano12
-	chk.NoErr(s.Update("key2", -222.0)) // clkNano13
+	chk.NoErr(float32Store.Update("key1", 222.0))  // clkNano12
+	chk.NoErr(float32Store.Update("key2", -222.0)) // clkNano13
 
-	validateFloat32History(chk, s, "key1", 0, // advances to clkNano14
+	validateFloat32History(chk, float32Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]float32{222.0},
 	)
 
-	validateFloat32History(chk, s, "key2", 0, // advances to clkNano15
+	validateFloat32History(chk, float32Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]float32{-222.0},
 	)

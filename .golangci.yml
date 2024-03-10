@@ -8,13 +8,11 @@ linters-settings:
         - i int
         - mi int
         - ok bool
-      #  - re *regexp.Regexp
 
 linters:
   enable-all: true
   disable:
     - lll
-    - varnamelen
 
     - deadcode # Deprecated
     - exhaustivestruct # Deprecated
@@ -50,7 +48,6 @@ issues:
         - prealloc
         - revive
         - testpackage
-        - varnamelen
         - wastedassign
         - unparam
 

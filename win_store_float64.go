@@ -32,32 +32,32 @@ type WStoreFloat64 struct {
 }
 
 // NewFloat64 a new Store object.
-func NewFloat64(dir, fName string) *WStoreFloat64 {
+func NewFloat64(dirName, filenameRoot string) *WStoreFloat64 {
 	return &WStoreFloat64{
-		fileStore: newFileStore(dir, fName),
+		fileStore: newFileStore(dirName, filenameRoot),
 	}
 }
 
 func (s *WStoreFloat64) parseFloat64(raw string) (float64, bool) {
-	v, err := strconv.ParseFloat(raw, 64)
+	value, err := strconv.ParseFloat(raw, 64)
 	if err != nil {
 		errMsg := "parseFloat64: invalid "
 
 		switch {
 		case errors.Is(err, strconv.ErrRange):
 			errMsg += rangeErrPrefix
-			v = math.NaN()
+			value = math.NaN()
 		default: //  errors.Is(err, strconv.ErrSyntax):
 			errMsg += syntaxErrPrefix
-			v = 0
+			value = 0
 		}
 
 		s.logMsg(errMsg + strconv.Quote(raw))
 
-		return v, false
+		return value, false
 	}
 
-	return v, true
+	return value, true
 }
 
 // Update creates or updates a new key value.
@@ -86,25 +86,25 @@ func (s *WStoreFloat64) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []float64) {
 	var (
-		t []time.Time
-		v []float64
+		timestamps []time.Time
+		values     []float64
 	)
 
 	s.fileStore.getHistoryDays(
-		key, days, func(a Action, ts time.Time, raw string,
+		key, days, func(a Action, timestamp time.Time, raw string,
 		) {
 			if a == ActionDelete {
-				t = nil
-				v = nil
+				timestamps = nil
+				values = nil
 			} else {
 				v64, ok := s.parseFloat64(raw)
 				if ok {
-					t = append(t, ts)
-					v = append(v, v64)
+					timestamps = append(timestamps, timestamp)
+					values = append(values, v64)
 				}
 			}
 		},
 	)
 
-	return t, v
+	return timestamps, values
 }

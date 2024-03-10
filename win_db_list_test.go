@@ -39,31 +39,31 @@ func TestWindowStorePublic_UnknownDuplicateWindows(t *testing.T) {
 		ErrDupWinKey.Error(),
 	)
 
-	a, err := winDB.getAvg("winKey1")
+	average, err := winDB.getAvg("winKey1")
 	chk.Err(
 		err,
 		ErrNoWinData.Error(),
 	)
-	chk.Float64(a, 0, 0)
+	chk.Float64(average, 0, 0)
 
-	c, err := winDB.getCount("winKey1")
+	count, err := winDB.getCount("winKey1")
 	chk.Err(
 		err,
 		ErrNoWinData.Error(),
 	)
-	chk.Uint64(c, 0, 0)
+	chk.Uint64(count, 0, 0)
 
-	a, err = winDB.getAvg("unknownWindowKey")
+	average, err = winDB.getAvg("unknownWindowKey")
 	chk.Err(
 		err, ErrUnknownWinKey.Error(),
 	)
-	chk.Float64(a, 0, 0)
+	chk.Float64(average, 0, 0)
 
-	c, err = winDB.getCount("unknownWindowKey")
+	count, err = winDB.getCount("unknownWindowKey")
 	chk.Err(
 		err, ErrUnknownWinKey.Error(),
 	)
-	chk.Uint64(c, 0, 0)
+	chk.Uint64(count, 0, 0)
 }
 
 func TestWindowStorePublic_AddWindowValueUseCase(t *testing.T) {

@@ -28,28 +28,28 @@ import (
 // an individual window and the collection of all windows associated with
 // a specific data key.
 type windowEntry struct {
-	t    time.Time
-	f    float64
-	prev *windowEntry
-	next *windowEntry
+	timestamp time.Time
+	value     float64
+	prev      *windowEntry
+	next      *windowEntry
 }
 
 func (e *windowEntry) newHead(
-	n *windowEntry, t time.Time, f float64,
+	entry *windowEntry, timestamp time.Time, value float64,
 ) *windowEntry {
-	if n == nil {
-		n = new(windowEntry)
+	if entry == nil {
+		entry = new(windowEntry)
 	}
 
-	n.t = t
-	n.f = f
-	n.next = e
+	entry.timestamp = timestamp
+	entry.value = value
+	entry.next = e
 
 	if e != nil {
-		e.prev = n
+		e.prev = entry
 	}
 
-	return n
+	return entry
 }
 
 func (e *windowEntry) String() string {
@@ -57,9 +57,9 @@ func (e *windowEntry) String() string {
 		return "<nil>"
 	}
 
-	return e.t.Format(fmtTimeStamp) +
+	return e.timestamp.Format(fmtTimeStamp) +
 		" - " +
-		strconv.FormatFloat(e.f, 'g', -1, 64)
+		strconv.FormatFloat(e.value, 'g', -1, 64)
 }
 
 // Window represents a specific collection of measurements included in a
@@ -76,44 +76,44 @@ type window struct {
 	thresholds []*threshold
 }
 
-func newWindow(datKey, winKey string, p time.Duration) *window {
-	if p < time.Nanosecond {
-		p = time.Nanosecond
+func newWindow(datKey, winKey string, timePeriod time.Duration) *window {
+	if timePeriod < time.Nanosecond {
+		timePeriod = time.Nanosecond
 	}
 
 	newWin := new(window)
 	newWin.datKey = datKey
 	newWin.winKey = winKey
-	newWin.period = p
+	newWin.period = timePeriod
 
 	return newWin
 }
 
 func (w *window) addThreshold(
 	lowCritical, lowWarning, highWarning, highCritical float64,
-	callback ThresholdCallbackFunc,
+	callback ThresholdNotifyFunc,
 ) error {
-	t, err := newThreshold(
+	threshold, err := newThreshold(
 		w.datKey, w.winKey,
 		lowCritical, lowWarning, highWarning, highCritical,
 		callback,
 	)
 	if err == nil {
-		w.thresholds = append(w.thresholds, t)
+		w.thresholds = append(w.thresholds, threshold)
 	}
 
 	return err
 }
 
-func (w *window) add(e *windowEntry) {
-	w.newest = e
+func (w *window) add(newEntry *windowEntry) {
+	w.newest = newEntry
 	if w.oldest == nil {
 		// First entry.
-		w.oldest = e
+		w.oldest = newEntry
 	}
 
 	w.count++
-	w.total += e.f
+	w.total += newEntry.value
 	w.trim()
 	w.avg = w.total / float64(w.count)
 
@@ -132,12 +132,12 @@ func (w *window) trim() {
 			return
 		}
 
-		if w.newest.t.Sub(w.oldest.t) <= w.period {
+		if w.newest.timestamp.Sub(w.oldest.timestamp) <= w.period {
 			return
 		}
 
 		w.count--
-		w.total -= w.oldest.f
+		w.total -= w.oldest.value
 		w.oldest = w.oldest.prev
 	}
 }

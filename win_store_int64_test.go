@@ -34,22 +34,22 @@ func setupWStoreInt64WithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewInt64(dir, fName)
-	s.ts = chk.ClockNext
+	int64Store := NewInt64(dirName, filename)
+	int64Store.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, int64Store
 }
 
 func validateInt64History(
 	chk *sztest.Chk,
-	s *WStoreInt64,
+	int64Store *WStoreInt64,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateInt64History(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := int64Store.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Int64(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Int64(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := int64Store.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateInt64History(
 func Test_WStoreInt64_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreInt64WithClock(
+
+	dirName, filename, int64Store := setupWStoreInt64WithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|9223372036854775808"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(int64Store.Open())
+	defer closeAndLogIfError(int64Store)
 
-	validateInt64History(chk, s, "key1", 0, // advances to clkNano2
+	validateInt64History(chk, int64Store, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]int64{},
 	)
 
-	validateInt64History(chk, s, "key2", 0, // advances to clkNano2
+	validateInt64History(chk, int64Store, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]int64{},
 	)
 
-	chk.NoErr(s.Update("key1", 200))  // clkNano4
-	chk.NoErr(s.Update("key2", -200)) // clkNano5
+	chk.NoErr(int64Store.Update("key1", 200))  // clkNano4
+	chk.NoErr(int64Store.Update("key2", -200)) // clkNano5
 
-	validateInt64History(chk, s, "key1", 0, // advances to clkNano6
+	validateInt64History(chk, int64Store, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]int64{200},
 	)
 
-	validateInt64History(chk, s, "key2", 0, // advances to clkNano7
+	validateInt64History(chk, int64Store, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]int64{-200},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(int64Store.Delete("key1")) // clkNano8
+	chk.NoErr(int64Store.Delete("key2")) // clkNano9
 
-	validateInt64History(chk, s, "key1", 0, // advances to clkNano10
+	validateInt64History(chk, int64Store, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]int64{},
 	)
 
-	validateInt64History(chk, s, "key2", 0, // advances to clkNano11
+	validateInt64History(chk, int64Store, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]int64{},
 	)
 
-	chk.NoErr(s.Update("key1", 222))  // clkNano12
-	chk.NoErr(s.Update("key2", -222)) // clkNano13
+	chk.NoErr(int64Store.Update("key1", 222))  // clkNano12
+	chk.NoErr(int64Store.Update("key2", -222)) // clkNano13
 
-	validateInt64History(chk, s, "key1", 0, // advances to clkNano14
+	validateInt64History(chk, int64Store, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]int64{222},
 	)
 
-	validateInt64History(chk, s, "key2", 0, // advances to clkNano15
+	validateInt64History(chk, int64Store, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]int64{-222},
 	)

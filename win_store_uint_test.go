@@ -34,22 +34,22 @@ func setupWStoreUintWithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewUint(dir, fName)
-	s.ts = chk.ClockNext
+	uintStore := NewUint(dirName, filename)
+	uintStore.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, uintStore
 }
 
 func validateUintHistory(
 	chk *sztest.Chk,
-	s *WStoreUint,
+	uintStore *WStoreUint,
 	datKey string,
 	days uint,
 	expTSlice []string,
@@ -57,17 +57,17 @@ func validateUintHistory(
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := uintStore.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Uint(v, expVSlice[len(expVSlice)-1], 0)
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Uint(value, expVSlice[len(expVSlice)-1], 0)
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := uintStore.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,67 +82,68 @@ func validateUintHistory(
 func Test_WStoreUint_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
-	dir, file, s := setupWStoreUintWithClock(
+
+	dirName, filename, uintStore := setupWStoreUintWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|abc"},
 			{ /* clkNano1 */ "", "|U|key2|18446744073709551616"},
 		}),
 	)
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(uintStore.Open())
+	defer closeAndLogIfError(uintStore)
 
-	validateUintHistory(chk, s, "key1", 0, // advances to clkNano2
+	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]uint{},
 	)
 
-	validateUintHistory(chk, s, "key2", 0, // advances to clkNano2
+	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]uint{},
 	)
 
-	chk.NoErr(s.Update("key1", 200)) // clkNano4
-	chk.NoErr(s.Update("key2", 400)) // clkNano5
+	chk.NoErr(uintStore.Update("key1", 200)) // clkNano4
+	chk.NoErr(uintStore.Update("key2", 400)) // clkNano5
 
-	validateUintHistory(chk, s, "key1", 0, // advances to clkNano6
+	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]uint{200},
 	)
 
-	validateUintHistory(chk, s, "key2", 0, // advances to clkNano7
+	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]uint{400},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(uintStore.Delete("key1")) // clkNano8
+	chk.NoErr(uintStore.Delete("key2")) // clkNano9
 
-	validateUintHistory(chk, s, "key1", 0, // advances to clkNano10
+	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]uint{},
 	)
 
-	validateUintHistory(chk, s, "key2", 0, // advances to clkNano11
+	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]uint{},
 	)
 
-	chk.NoErr(s.Update("key1", 222)) // clkNano12
-	chk.NoErr(s.Update("key2", 444)) // clkNano13
+	chk.NoErr(uintStore.Update("key1", 222)) // clkNano12
+	chk.NoErr(uintStore.Update("key2", 444)) // clkNano13
 
-	validateUintHistory(chk, s, "key1", 0, // advances to clkNano14
+	validateUintHistory(chk, uintStore, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]uint{222},
 	)
 
-	validateUintHistory(chk, s, "key2", 0, // advances to clkNano15
+	validateUintHistory(chk, uintStore, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]uint{444},
 	)

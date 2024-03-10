@@ -61,7 +61,7 @@ func TestThresholdData_InvalidParameterOrdering(t *testing.T) {
 	chk.Err(err, ErrInvalidThresholdOrder.Error())
 }
 
-func TestThresholdData_InvalidCallbackFunction(t *testing.T) {
+func TestThresholdData_InvalidNotifyFunction(t *testing.T) {
 	chk := sztest.CaptureNothing(t)
 	defer chk.Release()
 
@@ -72,15 +72,15 @@ func TestThresholdData_InvalidCallbackFunction(t *testing.T) {
 
 	chk.Err(
 		err,
-		ErrNilCallback.Error(),
+		ErrNilNotifyFunc.Error(),
 	)
 }
 
-func TestThresholdData_CallbackFunctions(t *testing.T) {
+func TestThresholdData_NotifyFunction(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	th, err := newThreshold(
+	threshold, err := newThreshold(
 		"datKey", "winKey",
 		5, 10, 15, 20,
 		func(k, w string, o, n ThresholdReason, v float64) {
@@ -91,13 +91,13 @@ func TestThresholdData_CallbackFunctions(t *testing.T) {
 	)
 	chk.NoErr(err)
 
-	var f float64
-	for f = 0; f < 26; f++ {
-		th.check(f)
+	var value float64
+	for value = 0; value < 26; value++ {
+		threshold.check(value)
 	}
 
-	for f = 25; f >= 0; f-- {
-		th.check(f)
+	for value = 25; value >= 0; value-- {
+		threshold.check(value)
 	}
 
 	chk.AddSub(`4\.000000`, "3.000000")

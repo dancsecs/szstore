@@ -34,39 +34,39 @@ func setupWStoreStringWithClock(
 	chk.ClockSet(initialTime, inc...)
 	chk.ClockAddSub(sztest.ClockSubNano)
 
-	dir := chk.CreateTmpDir()
+	dirName := chk.CreateTmpDir()
 
-	const fName = "dataFile"
+	const filename = "dataFile"
 
-	s := NewString(dir, fName)
-	s.ts = chk.ClockNext
+	stringStore := NewString(dirName, filename)
+	stringStore.ts = chk.ClockNext
 
-	chk.AddSub("{{dir}}", dir)
-	chk.AddSub("{{file}}", fName)
+	chk.AddSub("{{dir}}", dirName)
+	chk.AddSub("{{file}}", filename)
 
-	return dir, fName, s
+	return dirName, filename, stringStore
 }
 
 func validateStringHistory(
 	chk *sztest.Chk,
-	s *WStoreString,
+	stringStore *WStoreString,
 	datKey string,
 	days uint,
 	expTSlice, expVSlice []string,
 ) {
 	chk.T().Helper()
 
-	ts, v, ok := s.Get(datKey)
+	timestamp, value, ok := stringStore.Get(datKey)
 
 	if len(expTSlice) == 0 {
 		chk.Falsef(ok, "Checking s.Get(%q)", datKey)
 	} else {
 		chk.True(ok)
-		chk.Str(ts.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
-		chk.Str(v, expVSlice[len(expVSlice)-1])
+		chk.Str(timestamp.Format(fmtTimeStamp), expTSlice[len(expTSlice)-1])
+		chk.Str(value, expVSlice[len(expVSlice)-1])
 	}
 
-	tsSlice, vSlice := s.GetHistoryDays(datKey, days)
+	tsSlice, vSlice := stringStore.GetHistoryDays(datKey, days)
 
 	var tSlice []string
 
@@ -82,29 +82,29 @@ func Test_WStoreString_InvalidStringContent(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	dir, file, s := setupWStoreStringWithClock(
+	dirName, filename, stringStore := setupWStoreStringWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|"},
 		}),
 	)
 
-	s.SetInvalidChars([]rune{'<', '>'})
+	stringStore.SetInvalidChars([]rune{'<', '>'})
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(stringStore.Open())
+	defer closeAndLogIfError(stringStore)
 
 	chk.Err(
-		s.Update("invalidContent", "<"),
+		stringStore.Update("invalidContent", "<"),
 		ErrInvalidStoreString.Error(),
 	)
 
-	chk.NoErr(s.Update("valueContent", "a"))
+	chk.NoErr(stringStore.Update("valueContent", "a"))
 
 	chk.Log(
 		`opening file based szStore {{file}} in directory {{dir}}`,
@@ -117,29 +117,29 @@ func Test_WStoreString_InvalidStringValue(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	dir, file, s := setupWStoreStringWithClock(
+	dirName, fileName, stringStore := setupWStoreStringWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, fileName, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|"},
 		}),
 	)
 
-	s.SetValidValues([]string{"one", "two"})
+	stringStore.SetValidValues([]string{"one", "two"})
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(stringStore.Open())
+	defer closeAndLogIfError(stringStore)
 
 	chk.Err(
-		s.Update("invalidContent", "three"),
+		stringStore.Update("invalidContent", "three"),
 		ErrInvalidStoreString.Error(),
 	)
 
-	chk.NoErr(s.Update("invalidContent", "two"))
+	chk.NoErr(stringStore.Update("invalidContent", "two"))
 
 	chk.Log(
 		`opening file based szStore {{file}} in directory {{dir}}`,
@@ -152,69 +152,69 @@ func Test_WStoreString_UseCase(t *testing.T) {
 	chk := sztest.CaptureLog(t)
 	defer chk.Release()
 
-	dir, file, s := setupWStoreStringWithClock(
+	dirName, filename, stringStore := setupWStoreStringWithClock(
 		chk,
 		time.Date(2000, 5, 15, 12, 24, 56, 0, time.Local),
 		time.Millisecond*20,
 	)
 
 	chk.NoErr(
-		buildHistoryFile(chk, 0, dir, file, [][2]string{
+		buildHistoryFile(chk, 0, dirName, filename, [][2]string{
 			{ /* clkNano0 */ "", "|U|key1|<"},
 			{ /* clkNano1 */ "", "|U|key2|>"},
 		}),
 	)
 
-	s.SetInvalidChars([]rune{'<', '>'})
+	stringStore.SetInvalidChars([]rune{'<', '>'})
 
-	chk.NoErr(s.Open())
-	defer closeAndLogIfError(s)
+	chk.NoErr(stringStore.Open())
+	defer closeAndLogIfError(stringStore)
 
-	validateStringHistory(chk, s, "key1", 0, // advances to clkNano2
+	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano2
 		[]string{},
 		[]string{},
 	)
 
-	validateStringHistory(chk, s, "key2", 0, // advances to clkNano2
+	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano2
 		[]string{},
 		[]string{},
 	)
 
-	chk.NoErr(s.Update("key1", "key1BeforeDelete")) // clkNano4
-	chk.NoErr(s.Update("key2", "key2BeforeDelete")) // clkNano5
+	chk.NoErr(stringStore.Update("key1", "key1BeforeDelete")) // clkNano4
+	chk.NoErr(stringStore.Update("key2", "key2BeforeDelete")) // clkNano5
 
-	validateStringHistory(chk, s, "key1", 0, // advances to clkNano6
+	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano6
 		[]string{"{{clkNano4}}"},
 		[]string{"key1BeforeDelete"},
 	)
 
-	validateStringHistory(chk, s, "key2", 0, // advances to clkNano7
+	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano7
 		[]string{"{{clkNano5}}"},
 		[]string{"key2BeforeDelete"},
 	)
 
-	chk.NoErr(s.Delete("key1")) // clkNano8
-	chk.NoErr(s.Delete("key2")) // clkNano9
+	chk.NoErr(stringStore.Delete("key1")) // clkNano8
+	chk.NoErr(stringStore.Delete("key2")) // clkNano9
 
-	validateStringHistory(chk, s, "key1", 0, // advances to clkNano10
+	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano10
 		[]string{},
 		[]string{},
 	)
 
-	validateStringHistory(chk, s, "key2", 0, // advances to clkNano11
+	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano11
 		[]string{},
 		[]string{},
 	)
 
-	chk.NoErr(s.Update("key1", "key1AfterDelete")) // clkNano12
-	chk.NoErr(s.Update("key2", "key2AfterDelete")) // clkNano13
+	chk.NoErr(stringStore.Update("key1", "key1AfterDelete")) // clkNano12
+	chk.NoErr(stringStore.Update("key2", "key2AfterDelete")) // clkNano13
 
-	validateStringHistory(chk, s, "key1", 0, // advances to clkNano14
+	validateStringHistory(chk, stringStore, "key1", 0, // advances to clkNano14
 		[]string{"{{clkNano12}}"},
 		[]string{"key1AfterDelete"},
 	)
 
-	validateStringHistory(chk, s, "key2", 0, // advances to clkNano15
+	validateStringHistory(chk, stringStore, "key2", 0, // advances to clkNano15
 		[]string{"{{clkNano13}}"},
 		[]string{"key2AfterDelete"},
 	)

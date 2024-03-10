@@ -31,32 +31,32 @@ type WStoreUint16 struct {
 }
 
 // NewUint16 a new Store object.
-func NewUint16(dir, fName string) *WStoreUint16 {
+func NewUint16(dirName, filenameRoot string) *WStoreUint16 {
 	return &WStoreUint16{
-		fileStore: newFileStore(dir, fName),
+		fileStore: newFileStore(dirName, filenameRoot),
 	}
 }
 
 func (s *WStoreUint16) parseUint16(raw string) (uint16, bool) {
-	v, err := strconv.ParseUint(raw, 10, 16)
+	value, err := strconv.ParseUint(raw, 10, 16)
 	if err != nil {
 		errMsg := "parseUint16: invalid "
 
 		switch {
 		case errors.Is(err, strconv.ErrRange):
 			errMsg += rangeErrPrefix
-			v = 0
+			value = 0
 		default: //  errors.Is(err, strconv.ErrSyntax):
 			errMsg += syntaxErrPrefix
-			v = 0
+			value = 0
 		}
 
 		s.logMsg(errMsg + strconv.Quote(raw))
 
-		return uint16(v), false
+		return uint16(value), false
 	}
 
-	return uint16(v), true
+	return uint16(value), true
 }
 
 // Update creates or updates a new key value.
@@ -85,25 +85,25 @@ func (s *WStoreUint16) GetHistoryDays(
 	key string, days uint,
 ) ([]time.Time, []uint16) {
 	var (
-		t []time.Time
-		v []uint16
+		timestamps []time.Time
+		values     []uint16
 	)
 
 	s.fileStore.getHistoryDays(
-		key, days, func(a Action, ts time.Time, raw string,
+		key, days, func(a Action, timestamp time.Time, raw string,
 		) {
 			if a == ActionDelete {
-				t = nil
-				v = nil
+				timestamps = nil
+				values = nil
 			} else {
 				v32, ok := s.parseUint16(raw)
 				if ok {
-					t = append(t, ts)
-					v = append(v, v32)
+					timestamps = append(timestamps, timestamp)
+					values = append(values, v32)
 				}
 			}
 		},
 	)
 
-	return t, v
+	return timestamps, values
 }

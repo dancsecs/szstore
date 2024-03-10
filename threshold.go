@@ -23,8 +23,8 @@ import (
 	"time"
 )
 
-// ThresholdCallbackFunc defines the Threshold callback function.
-type ThresholdCallbackFunc func(
+// ThresholdNotifyFunc defines the Threshold callback function.
+type ThresholdNotifyFunc func(
 	string, // The datKey.
 	string, // The winKey.
 	ThresholdReason, // Changed from.
@@ -77,7 +77,7 @@ type threshold struct {
 	highWarning   float64
 	highCritical  float64
 	currentReason ThresholdReason
-	callback      ThresholdCallbackFunc
+	callback      ThresholdNotifyFunc
 	started       time.Time
 }
 
@@ -85,7 +85,7 @@ type threshold struct {
 func newThreshold(
 	datKey, winKey string,
 	lowCritical, lowWarning, highWarning, highCritical float64,
-	callback ThresholdCallbackFunc,
+	notifyFunc ThresholdNotifyFunc,
 ) (*threshold, error) {
 	invalid := false ||
 		lowCritical > lowWarning ||
@@ -95,8 +95,8 @@ func newThreshold(
 		return nil, ErrInvalidThresholdOrder
 	}
 
-	if callback == nil {
-		return nil, ErrNilCallback
+	if notifyFunc == nil {
+		return nil, ErrNilNotifyFunc
 	}
 
 	return &threshold{
@@ -106,7 +106,7 @@ func newThreshold(
 		lowWarning:    lowWarning,
 		highWarning:   highWarning,
 		highCritical:  highCritical,
-		callback:      callback,
+		callback:      notifyFunc,
 		currentReason: ThresholdUnknown,
 		started:       time.Now(),
 	}, nil
@@ -114,17 +114,17 @@ func newThreshold(
 
 // Check determines if the threshold has changed and if so invokes the supplied
 // callback function.
-func (d *threshold) check(v float64) {
+func (d *threshold) check(value float64) {
 	var newReason ThresholdReason
 
 	switch {
-	case v <= d.lowCritical:
+	case value <= d.lowCritical:
 		newReason = ThresholdLowCritical
-	case v <= d.lowWarning:
+	case value <= d.lowWarning:
 		newReason = ThresholdLowWarning
-	case v < d.highWarning:
+	case value < d.highWarning:
 		newReason = ThresholdNormal
-	case v < d.highCritical:
+	case value < d.highCritical:
 		newReason = ThresholdHighWarning
 	default:
 		newReason = ThresholdHighCritical
@@ -133,6 +133,6 @@ func (d *threshold) check(v float64) {
 	if d.currentReason != newReason {
 		oldReason := d.currentReason
 		d.currentReason = newReason
-		d.callback(d.datKey, d.winKey, oldReason, newReason, v)
+		d.callback(d.datKey, d.winKey, oldReason, newReason, value)
 	}
 }

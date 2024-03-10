@@ -36,14 +36,14 @@ var (
 	ErrDupWinKey             = errors.New("duplicate window key")
 	ErrNoWinData             = errors.New("no window data")
 	ErrUnknownAction         = errors.New("unknown callback action")
-	ErrNilCallback           = errors.New("invalid nil callback")
+	ErrNilNotifyFunc         = errors.New("invalid nil notify function")
 	ErrInvalidRecord         = errors.New("invalid record")
 	ErrOpenedWindow          = errors.New("invalid add window on opened db")
 	ErrOpenedWindowThreshold = errors.New(
 		"invalid add window threshold on opened db",
 	)
-	ErrOpenedWindowCallback = errors.New(
-		"invalid add window callback on opened db",
+	ErrOpenedWindowNotifyFunc = errors.New(
+		"invalid add window notify function on opened db",
 	)
 	ErrInvalidBoolThreshold = errors.New(
 		"boolean thresholds must be >=0 and <= 1",
