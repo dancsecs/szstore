@@ -53,7 +53,7 @@ func (s *WStoreUint16) parseUint16(raw string) (uint16, bool) {
 
 		s.logMsg(errMsg + strconv.Quote(raw))
 
-		return uint16(value), false
+		return uint16(value), false //nolint:gosec // Ok already checked.
 	}
 
 	return uint16(value), true

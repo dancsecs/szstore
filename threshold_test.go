@@ -94,11 +94,11 @@ func TestThresholdData_NotifyFunction(t *testing.T) {
 	chk.NoErr(err)
 
 	var value float64
-	for value = 0; value < 26; value++ {
+	for value = 0.0; value < 26.0; value++ {
 		threshold.check(value)
 	}
 
-	for value = 25; value >= 0; value-- {
+	for value = 25.0; value >= 0.0; value-- {
 		threshold.check(value)
 	}
 

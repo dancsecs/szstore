@@ -53,7 +53,7 @@ func (s *WStoreInt32) parseInt32(raw string) (int32, bool) {
 
 		s.logMsg(errMsg + strconv.Quote(raw))
 
-		return int32(value), false
+		return int32(value), false //nolint:gosec // Ok.
 	}
 
 	return int32(value), true

@@ -379,6 +379,7 @@ func (fs *fileStore) getHistoryDays(
 	fs.rwMutex.RLock()
 	defer fs.rwMutex.RUnlock()
 
+	//nolint:gosec //Ok if days loses precision.
 	minFile := fs.filenameRoot +
 		"_" +
 		fs.ts().AddDate(0, 0, -1*int(days)).Format(fmtDateStamp)

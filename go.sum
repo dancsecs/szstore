@@ -1,2 +1,4 @@
-github.com/dancsecs/sztest v0.0.0-20240523122652-8619cca9e89f h1:O3tZ8zmu10ojrdI9I7MotJBropgQwyLADweDZVmdKHU=
-github.com/dancsecs/sztest v0.0.0-20240523122652-8619cca9e89f/go.mod h1:kbuIqdeICPjQoRnA7ZSxlOYuk4qwLywBRfdDiHPm7Gw=
+github.com/dancsecs/sztest v0.1.1 h1:j1lIMAek3ndOWd8QAApKUOVKzTgKyLL21I1Hda4wMDw=
+github.com/dancsecs/sztest v0.1.1/go.mod h1:kbuIqdeICPjQoRnA7ZSxlOYuk4qwLywBRfdDiHPm7Gw=
+github.com/dancsecs/sztest v0.1.3 h1:TCc+mDt2BBwUt/5em07VH5BB62NAG6WgsEDsNaUHnPc=
+github.com/dancsecs/sztest v0.1.3/go.mod h1:3j1h9eWcBMjCAVUZ4MoI/Y/wSVgMAIQPwqiKmK6jmmo=
